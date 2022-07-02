@@ -372,7 +372,14 @@ def MyEdge(url='', silent=None):
     options = webdriver.EdgeOptions()
     if not silent == None:
         options.add_argument('headless')
-    driver = webdriver.Edge(options=options)
+    try:
+        driver = webdriver.Edge(options=options)
+    except selenium.common.exceptions.SessionNotCreatedException:
+        print('貌似msedgedriver.exe版本过低。已经自动复制网址链接。请打开浏览器进行下载。')
+        pyperclip.copy('https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/')
+        sys.exit()
+    finally:
+        ()
     if not url == '':
         driver.get(url)
     return driver
@@ -835,12 +842,14 @@ def calltime(n):
 for i in RefreshTXT('D:/Kaleidoscope/ActivDisc.txt').l:
     if DiscInfo(i)>=1:
         os.chdir(i+':/')
+        MyUtils.log(f'operating DISK {str.title(i)}')
         break
 
 def dosth():
     time.sleep(2)
 
 def log(s):
+    s=str(s)
     print(f'{MyTime("hms")}  {inspect.getframeinfo(inspect.currentframe().f_back)[2]}\n\t{s}')
 
 log('MyUtils already loaded')

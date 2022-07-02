@@ -44,7 +44,7 @@ def Download():
             #     下载
             # 生成网址
             pyperclip.copy(f'https://www.bilibili.com/video/{bvid}')
-            time.sleep(5)
+            time.sleep(10)
             #     点击下载
             # pyautogui.click(305, 985)+
             time.sleep(5)
@@ -55,7 +55,7 @@ def Download():
             if count>MAX:
                 time.sleep(10)
 
-    # 本页下载完了，下一页
+    # 本页下载完了，下一页d
     # time.sleep(tim*2)
     tim=0
     page += 1

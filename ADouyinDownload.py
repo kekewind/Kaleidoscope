@@ -16,10 +16,11 @@ def Download():
     # MyUtils.log('[Download] Func Begin')
     while len(ReadyToDownload):
         (VideoNum,(HostID, title, VideoUrl)) = ReadyToDownload.popitem()
-        # MyUtils.log(f'[Download]VideoNum={VideoNum} HostID={HostID} title={title} VideoUrl={VideoUrl}')
+        # MyUtils.log(f'VideoNum={VideoNum} HostID={HostID} title={title} VideoUrl={VideoUrl}')
         if not len(VideoUrl)>1:
             # 视频
             path = '../抖音/' + HostID
+            # MyUtils.log(f'开始下载，url={VideoUrl[0]}')
             t=MyUtils.MyPageDownload(url=VideoUrl[0],path= f'{path}/{title}.mp4')
         else:
             # 图文
@@ -28,7 +29,8 @@ def Download():
             i=0
             for url in VideoUrl:
                 i+=1
-                t=t and MyUtils.MyPageDownload(url=url,path= f'{path}/{title}/{i}.png')
+                # MyUtils.log(f'开始下载，url={url}')
+                t=MyUtils.MyPageDownload(url=url,path= f'{path}/{title}/{i}.png')
         if t:
             LocalVideoSpectrum.add(VideoNum)
             MyUtils.log(f'{MyUtils.MyTime("hms")}\n[Download]下载成功，{VideoNum}记录补全.')
@@ -83,11 +85,12 @@ def detect(path,HostID,VideoNum,l):
             MyElement(silent=True,l=[page, By.XPATH,'/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div[1]/div/div[2]/div[2]/xg-video-container/video/source[1]'])\
             .get_attribute('src')]
     else:
-        elements = MyUtils.MyElements([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/main/div[1]/div[1]/div/div[2]/div/img'])
+        elements = MyUtils.MyElements(silent=True,l=[page, By.XPATH, '/html/body/div[1]/div/div[2]/div/main/div[1]/div[1]/div/div[2]/div/img'])
         for e in elements:
             https =e.get_attribute('src')
             VideoUrl.append(https)
     ReadyToDownload.update({VideoNum:(HostID,title,VideoUrl)})
+    # MyUtils.log(({VideoNum:(HostID,title,VideoUrl)}))
     # MyUtils.log(f' Robot{index+1}:探测到未下载。准备下载增加，{len(ReadyToDownload)}')
     isFull[index]=0
     MyUtils.log(f'Robot{index+1} {MyUtils.calltime(stole)}s')
@@ -113,7 +116,7 @@ ReadyToDownload = {}
 DouyinSum = 1
 maxworkers=5
 e=MyUtils.MyPool(maxworkers)
-maxworkers1=20
+maxworkers1=7
 e1=MyUtils.MyPool(maxworkers1)
 DouyinHost = MyUtils.MyEdge()
 isFull=[0 for i in range(maxworkers)]
@@ -184,7 +187,6 @@ try:
                         time.sleep(10)
                         MyUtils.log(f'等待最后的下载队列完毕。len(ReadtToDownload):{len(ReadyToDownload)}, e.cool:{e.cool}')
                     # 结束
-                    LocalUserSpectrum.save()
                     LocalVideoSpectrum.save()
                     MyUtils.log('LocalVideo: ', LocalVideoSpectrum.length(), ' LocalUser: ', LocalUserSpectrum.length(), f'Failed:{Failed.length()}')
                     DouyinHost.quit()
