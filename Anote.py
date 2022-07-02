@@ -26,11 +26,15 @@ while True:
         cc=input('请输入文案，以末尾的FE作为结束：')
         ccc=cc.strip('FE')
         ccc=cc.strip('EF')
+        ccc=cc.strip('ef')
+        ccc=cc.strip('fe')
         c+='\n'+cc
         if not ccc==cc:
             break
     c=c.strip('FE')
     c=c.strip('EF')
+    c=c.strip('ef')
+    c=c.strip('fe')
     c=c.replace('\n','\n\t')
     c=c+'\n'
     if c==c.strip('TEST'):
