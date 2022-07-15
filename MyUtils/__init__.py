@@ -1,4 +1,5 @@
 import _thread
+import multiprocessing
 import os
 import re
 import sys
@@ -24,10 +25,21 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 import Levenshtein
 from PIL import Image
+import datetime
+from threading import Thread
 
 # '//div[starts-with(@style,"transform:")]'
 import MyUtils
 
+global TimeStack
+TimeStack=[]
+TimeDict={}
+def gettime():
+    return datetime.datetime.now()
+debug=None
+def Debug():
+    global debug
+    debug=True
 headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36 Edg/96.0.1054.34',
     'cookie': 'douyin.com; ttcid=431befd8b5104ec2b3e9935bc6ec52f617; ttwid=1%7CBKDk4yeaBU1MV1-fraGgP1L1JdWPpe8YdQAQJ7zvkoc%7C1638280535%7C0de0bc257260629cad68f3e48827aa87dee824843719de85d6df5740b98a0b35; MONITOR_WEB_ID=61cd5100-8922-4e27-a39e-cff1aac97744; passport_csrf_token_default=8808f41976c316e1e4feeccc71659214; passport_csrf_token=8808f41976c316e1e4feeccc71659214; _tea_utm_cache_6383=undefined; s_v_web_id=verify_kyl03m2t_DbovL5hY_XEdE_4D3F_8ydf_SRFUbtcXvvzx; odin_tt=8c8649b73924e20b8ebd0865fe23dfff20abaa1c55057cc47a9e8995db9a8864b4068c42788c57d1bf943304c820a3a2265b74893008430f9b8ac37b9ffb30d8; MONITOR_DEVICE_ID=c7204e31-c2a3-4dda-9f7a-1b8411427356; douyin.com; _tea_utm_cache_1300=undefined; THEME_STAY_TIME=299336; IS_HIDE_THEME_CHANGE=1; pwa_guide_count=3; AB_LOGIN_GUIDE_TIMESTAMP=1642679265520; msToken=4_7ivDwiz55j5pmRF7atvbaf8SgF0y-eI27hDQZdBLq1YopXPbpC0w6sEDpLwKT00_5TzheRLUQ2sglBwgjWIqgnBHEXvP6eaUjNTXAiI2u1zwcdmTYHPDn8; __ac_nonce=061e95f77000bfa192695; __ac_signature=_02B4Z6wo00f01-ieBLAAAIDDaJz-8r8-h7fougAAAJvYGPJCHKcJjZKArtIgyqihOTmvd-8l-caB2p5EGf2-stiZBGEHYZi7rSyMXHQ8WZLWSz5p9AZQBzyIJN8ePDZ-bHh8Om-ryvd9bgnDf9; home_can_add_dy_2_desktop=1; tt_scid=W7mNcA0UmM9ddpdpKWW5LuB65BLEdJNsmETvz8y2qVv7kJQ14Ipb3-YDhjLfk-g54cc0; msToken=0rskkPniKM-M-1bVn67L-VEt7ef70JcEzqvxTNS7XYW_oDlImtGCB_V2XXJ_zpCB3SdaLFPMntJc711qeys6npV4YkXXCWI-ttAjdZgerI9XGkCdmgGv264='
@@ -35,8 +47,6 @@ headers = {
 Root = __file__
 Root = Root[0:Root.rfind('/')]
 hashRoot = 'D:/Programme Files/Spectrum'
-
-
 def MyDeletedir(l,silent=None):
     # 递归删除dir_path目标文件夹下所有文件，以及各级子文件夹下文件，保留各级空文件夹
     # (支持文件，文件夹不存在不报错)
@@ -57,7 +67,7 @@ def MyDeletedir(l,silent=None):
 
     if not type(l)==list:
         l=[l]
-    e=MyPool(1000)
+    e=MyThreadPool(1000)
     for file in l:
         # e.excute(del_files,file)
         del_files(file)
@@ -453,7 +463,17 @@ def MySetScrollTop(l):
     page.execute_script(f'document.documentElement.scrollTop={x}')
 
 
-def MyPageDownload(url, path, t=20, silent=True, depth=0):
+def MyPageDownload(url, path, t=20, silent=True, depth=0,auto=None):
+    def end():
+        time.sleep(t)
+        page.quit()
+        time.sleep(1)
+        # 如果下载失败，再下载一次30s
+        if os.path.exists(path + '.crdownload'):
+            os.remove(path + '.crdownload')
+            print(f'[MyRequestDownload] download failed.No crdownload file left(auto deleted). you may try {url}')
+            return MyPageDownload(url, path, t=30, depth=depth + 1)
+        return True
     if depth > 2:
         return False
     path = MyPath(path)
@@ -465,12 +485,14 @@ def MyPageDownload(url, path, t=20, silent=True, depth=0):
     # 设置下载路径
     prefs = {'download.default_directory': f'{root}'}
     options.add_experimental_option('prefs', prefs)
-    if not silent == None:
+    if silent == True:
         options.headless = True
     page = webdriver.Chrome(chrome_options=options)
     page.get(url)
     time.sleep(2)
     i = 0
+    if not auto==None:
+        return end()
     while i < 10:
         # 什么？？？竟然要尝试10次，哈哈哈真是笑死我了
         try:
@@ -482,15 +504,7 @@ def MyPageDownload(url, path, t=20, silent=True, depth=0):
             break
         except:
             i += 1
-    time.sleep(t)
-    page.quit()
-    time.sleep(1)
-    # 如果下载失败，再下载一次30s
-    if os.path.exists(path + '.crdownload'):
-        os.remove(path + '.crdownload')
-        print(f'[MyRequestDownload] download failed.No crdownload file left(auto deleted). you may try {url}')
-        return MyPageDownload(url, path, t=30, depth=depth + 1)
-    return True
+    return end()
 
 
 def ThreadPageDownload(url, path):
@@ -696,7 +710,7 @@ def MyTime(s=None):
 
 
 
-class MyPool():
+class MyThreadPool():
 
     def __init__(self, max_workers,show=None):
         self.cool=0
@@ -708,16 +722,16 @@ class MyPool():
     def excute(self, fn, /, *args, **kwargs):
         while self.isFulling():
             if not self.show == None:
-                print('[MyPool] 警报。excute被挂起，因为线程池已满')
+                print('[MyThreadPool] 警报。excute被挂起，因为线程池已满')
             time.sleep(5)
         self.cool+=1
         def do(fn,/,*args,**kwargs):
             if not self.show == None:
-                print(f'[MyPool] 当前线程开始。剩余线程 {self.cool}')
+                print(f'[MyThreadPool] 当前线程开始。剩余线程 {self.cool}')
             fn(*args,**kwargs)
             self.cool-=1
             if not self.show == None:
-                print(f'[MyPool]当前线程结束。剩余线程 {self.cool}')
+                print(f'[MyThreadPool]当前线程结束。剩余线程 {self.cool}')
 
         self.pool.submit(do,fn, *args,**kwargs)
 
@@ -727,14 +741,52 @@ class MyPool():
     def wait(self,show=None):
         while self.cool:
             if show:
-                print(f'[MyPool] 等待线程池腾空{self.cool}')
+                print(f'[MyThreadPool] 等待线程池腾空{self.cool}')
             time.sleep(3)
             while self.cool:
                 if show:
-                    print(f'[MyPool] 等待线程池腾空{self.cool}')
+                    print(f'[MyThreadPool] 等待线程池腾空{self.cool}')
                 time.sleep(3)
 
+class MyPool():
+    def __init__(self, max_workers=multiprocessing.cpu_count()-3,show=debug):
+        self.cool=0
+        self.max_workers = max_workers
+        self.pool = multiprocessing.Pool(processes=max_workers)
+        self.show=show
 
+
+    def add(self, fn, /, *args):
+    # def add(self, fn, /, *args, **kwargs):
+        while self.isFulling():
+            if not self.show == None:
+                print('[MyThreadPool] 警报。excute被挂起，因为线程池已满')
+            time.sleep(5)
+        self.cool+=1
+        def do(fn,/,*args):
+        # def do(fn,/,*args,**kwargs):
+            if not self.show == None:
+                print(f'[MyThreadPool] 当前线程开始。剩余线程 {self.cool}')
+            fn(*args)
+            # fn(*args,**kwargs)
+            self.cool-=1
+            if not self.show == None:
+                print(f'[MyThreadPool]当前线程结束。剩余线程 {self.cool}')
+        # self.pool.apply_async(do,args=(fn, *args,**kwargs))
+        self.pool.apply_async(do,args=(fn, *args))
+
+    def isFulling(self):
+        return self.cool>=self.max_workers
+
+    def wait(self,show=None):
+        while self.cool:
+            if show:
+                delog(f'等待线程池腾空0/{self.cool}')
+            time.sleep(3)
+            while self.cool:
+                if show:
+                    print(f'等待线程池腾空0/{self.cool}')
+                time.sleep(3)
 
 def MyKeyInput(x,y,s):
     pyperclip.copy(s)
@@ -825,32 +877,56 @@ def DiscInfo(s):
     return (free_b / gb)
 
 
-global ti
-ti = {}
-def settime(n=time.time()):
-    global ti
-    n=hash(n)
-    ti.update({n:time.time()})
-    return n
+def recordtime():
+    TimeStack.append(gettime())
 
-def calltime(n):
-    global ti
-    return time.time() - ti.get(n)
+def counttime(stole=None):
+    if not stole==None:
+        return gettime()-stole
+    if TimeStack==[]:
+        warn('你是不是没记录过时间的起点？')
+        return
+    return gettime()-TimeStack.pop(-1)
 
 # os.chdir(input('请输入操作盘，只输入一个大写字母。') + ':/')
 
-for i in RefreshTXT('D:/Kaleidoscope/ActivDisc.txt').l:
-    if DiscInfo(i)>=1:
-        os.chdir(i+':/')
-        MyUtils.log(f'operating DISK {str.title(i)}')
-        break
 
 def dosth():
     time.sleep(2)
-
+def warn(s):
+    s=str(s)
+    print(f'\033[7;31m{MyTime("hms")}  {(inspect.stack()[1].filename)}  {inspect.getframeinfo(inspect.currentframe().f_back)[2]}\033[0m')
+    print(f'\033[6;35m\t{s}\033[0m')
 def log(s):
     s=str(s)
-    print(f'{MyTime("hms")}  {inspect.getframeinfo(inspect.currentframe().f_back)[2]}\n\t{s}')
+    print(f'\033[7;32m{MyTime("hms")}  {(inspect.stack()[1].filename)}  {inspect.getframeinfo(inspect.currentframe().f_back)[2]}\033[0m')
+    print(f'\033[6;35m\t{s}\033[0m')
+
+def delog(s=0):
+    if not debug:
+        return
+    if s==0:
+        debug('is Processing.')
+        return
+    if s==-1:
+        debug('Processed.')
+        sys.exit(0)
+        return
+    dic={'a':'Announce Begin',
+         'z':"Announce End"
+         }
+    if s in dic.keys():
+        s=dic.get(s)
+
+    s=str(s)
+    print(f'\033[7;34m{MyTime("hms")}  {(inspect.stack()[1].filename)}  {inspect.getframeinfo(inspect.currentframe().f_back)[2]}\033[0m')
+    print(f'\033[6;35m\t{s}\033[0m')
+
+for i in RefreshTXT('D:/Kaleidoscope/ActivDisc.txt').l:
+    if DiscInfo(i) >= 1:
+        os.chdir(i + ':/')
+        log(f'operating DISK {str.title(i)}')
+        break
 
 log('MyUtils already loaded')
 

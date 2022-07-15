@@ -22,7 +22,7 @@ while True:
     # print(MyUtils.MyTime())
     c=''
     cc=''
-    while not (cc=='FE' or cc=='EF'):
+    while not (cc=='FE' or cc=='EF' or cc=='ef' or cc=='fe'):
         cc=input('请输入文案，以末尾的FE作为结束：')
         ccc=cc.strip('FE')
         ccc=cc.strip('EF')

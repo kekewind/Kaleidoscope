@@ -18,7 +18,7 @@ while i < 1002:
                 l.append(roots)
 
 # 逐个PageDownload
-e = MyUtils.MyPool(50)
+e = MyUtils.MyThreadPool(50)
 while file.loopcount < file.length():
     # 如果已下载，跳过
     if os.path.exists(droot + f'\\{file.loopcount + 1}') and not (droot + f'\\{file.loopcount + 1}') in l:

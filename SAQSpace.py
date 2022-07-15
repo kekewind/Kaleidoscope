@@ -9,7 +9,7 @@ User=MyUtils.RefreshTXT(droot+'User.txt')
 # page=MyUtils.MyEdge(silent=True)
 page=MyUtils.MyChrome()
 page.set_window_size(1920,1080)
-e=MyUtils.MyPool(20,show=1)
+e=MyUtils.MyThreadPool(20, show=1)
 b=True
 while User.loopcount<User.length():
     qq=User.get()

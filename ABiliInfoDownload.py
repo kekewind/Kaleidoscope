@@ -22,11 +22,11 @@ def Download():
         aid = video['aid']
         bvid = video['bvid']
         UserID=MyUtils.MyName(video["author"])
-        if UserID in dis.l:
-            coverspectrum.delete(UserUID)
-            MyUtils.MyDeletedir(f'../bili/{UserID}_{UserUID}')
-            continue
         title = MyUtils.MyName(video['title'])
+
+        if not os.path.exists(f'../bili/{UserID}_{UserUID}/{title}_{bvid}'):
+            continue
+
         description = (video['description'])
         f=MyUtils.MyTXT(f'../bili/{UserID}_{UserUID}/{title}_{bvid}/简介.txt')
         f.add(description)
@@ -40,7 +40,6 @@ def Download():
 
 coverspectrum=MyUtils.RefreshTXT('D:/Kaleidoscope/bili/CoverSpectrum.txt')
 BUtils.AddUser('https://space.bilibili.com/661654199/fans/follow?tagid=402237', coverspectrum)
-dis=MyUtils.RefreshTXT('D:/Kaleidoscope/bili/CoverDis.txt')
 
 
 
@@ -52,4 +51,3 @@ while True:
     print(f'[Main]用户总数 {coverspectrum.loopcount}/{coverspectrum.length()}')
     Download()
     coverspectrum.save()
-    dis.save()

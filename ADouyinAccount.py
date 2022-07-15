@@ -15,7 +15,7 @@ import MyUtils
 # 初始化
 LocalUserSpectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/UserSpectrum.txt')
 LocalVideoSpectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/VideoSpectrum.txt')
-print('Account Like processing. LocalVideo: ', (LocalVideoSpectrum.length()), ' LocalUser: ', (LocalUserSpectrum.length()))
+MyUtils.log('Account Like processing. LocalVideo: ', (LocalVideoSpectrum.length()), ' LocalUser: ', (LocalUserSpectrum.length()))
 # 定义字典
 likecount={}
 

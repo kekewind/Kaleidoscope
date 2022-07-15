@@ -85,7 +85,7 @@ def Download():
     Sections = MyUtils.MyFile('r', 'C:/Users/17371/Downloads/m3u8.txt')
     print('开始下载')
     inc = 0
-    e=MyUtils.MyPool(20)
+    e=MyUtils.MyThreadPool(20)
     for url in Sections:
         inc += 1
         if os.path.exists(path + f'/{inc}.mp4'):

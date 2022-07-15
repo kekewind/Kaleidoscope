@@ -34,7 +34,7 @@ def writedown():
         print('[writedown] end')
 
 
-e1=MyUtils.MyPool(2)
-e2=MyUtils.MyPool(2)
+e1=MyUtils.MyThreadPool(2)
+e2=MyUtils.MyThreadPool(2)
 e1.excute(record)
 e1.excute(writedown)

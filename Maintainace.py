@@ -84,7 +84,7 @@ def douyin4():
     exc=MyUtils.RefreshTXT('../抖音/ExceptionVideo.txt')
     ready=MyUtils.RefreshTXT('../抖音/AlreadyDownloaded.txt')
     pagelis=[MyUtils.MyEdge() for i in range(maxworkers)]
-    e=MyUtils.MyPool(maxworkers)
+    e=MyUtils.MyThreadPool(maxworkers)
     while file.loopcount<file.length():
         def detect():
             nonlocal file,pagelis,lis

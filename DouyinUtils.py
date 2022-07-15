@@ -27,12 +27,12 @@ def HostPieces(l):
     page=l[0]
     return MyUtils.MyElements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]'])
 
-def Element(l):
-    # 传入作品元素，返回元素的Url，链接
+def HostElement(l):
+    # 传入主页的作品元素，返回元素的Url，链接
     VideolElement=l[0]
-    VideoUrl = VideolElement.get_attribute('href')
-    VideoNum = VideoUrl[VideoUrl.rfind('/') + 1:len(VideoUrl)]
-    return (VideoUrl,VideoNum)
+    elementurl = VideolElement.get_attribute('href')
+    VideoNum = elementurl[elementurl.rfind('/') + 1:len(elementurl)]
+    return (elementurl,VideoNum)
 
 def IsPic(l):
     # 传入元素，返回是否是图文（真）还是视频
