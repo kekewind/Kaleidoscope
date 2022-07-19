@@ -35,15 +35,14 @@ def download():
                 t = MyUtils.MyPageDownload(url=url, path=f'{path}/{title}/{i}.png')
         if t:
             LocalVideoSpectrum.add(VideoNum)
-            MyUtils.log(f'{MyUtils.MyTime("hms")}\n[Download]下载成功，{VideoNum}记录补全.'+\
-                        '\n'+f'{DouyinSum}]{HostID}  :', f'作品编号：{VideoNum}     作品标题：{title}\n{VideoUrl}')
+            MyUtils.log(f'下载成功，{VideoNum}记录补全.\n{DouyinSum}]{HostID}  :作品编号：{VideoNum}     作品标题：{title}\n{VideoUrl}')
             DouyinSum += 1
             MyUtils.delog(0)
         else:
             Failed.add(title + '.mp4.crdownload')
             MyUtils.log(f'下载失败，记录增加')
 
-    MyUtils.log(f'cost{-stole+MyUtils.gettime()}')
+    MyUtils.log(f'cost{MyUtils.gettime()-stole}')
 
 
 #
@@ -72,15 +71,15 @@ def detect(path, HostID, VideoNum, l):
     # 如果下载过
     if os.path.exists(f'{path}/{title}.mp4') and not flag:
         LocalVideoSpectrum.add(VideoNum)
-        MyUtils.log(f' Robot{index + 1}: {HostID}{title}.mp4已存在磁盘中，补全记录')
+        MyUtils.log(f' Detect{index + 1}: {HostID}{title}.mp4已存在磁盘中，补全记录')
         isPageUsing[index] = 0
-        MyUtils.log(f'Robot{index + 1} {MyUtils.counttime(stole)}s')
+        MyUtils.log(f'Detect{index + 1} {MyUtils.counttime(stole)}s')
         return
     if flag and os.path.exists(f'{path}/{title}/{len(VideoNum) - 1}.png'):
         LocalVideoSpectrum.add(VideoNum)
-        MyUtils.log(f' Robot{index + 1}: {path}/{title}共{len(VideoNum)}张图片已存在磁盘中，补全记录')
+        MyUtils.log(f' Detect{index + 1}: {path}/{title}共{len(VideoNum)}张图片已存在磁盘中，补全记录')
         isPageUsing[index] = 0
-        MyUtils.log(f'Robot{index + 1} done. cost {MyUtils.counttime(stole)}s')
+        MyUtils.log(f'Detect{index + 1} done. cost {MyUtils.counttime(stole)}s')
         return
 
 
@@ -88,19 +87,19 @@ def detect(path, HostID, VideoNum, l):
     VideoUrl = []
     if not flag:
         VideoUrl = [MyUtils. \
-                        MyElement(silent=True, l=[page, By.XPATH,
+                        MyElement(show=None, l=[page, By.XPATH,
                                                   '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div[1]/div/div[2]/div[2]/xg-video-container/video/source[1]']) \
                         .get_attribute('src')]
     else:
-        elements = MyUtils.MyElements(silent=True, l=[page, By.XPATH, '/html/body/div[1]/div/div[2]/div/main/div[1]/div[1]/div/div[2]/div/img'])
+        elements = MyUtils.MyElements(show=None, l=[page, By.XPATH, '/html/body/div[1]/div/div[2]/div/main/div[1]/div[1]/div/div[2]/div/img'])
         for e in elements:
             https = e.get_attribute('src')
             VideoUrl.append(https)
     ReadyToDownload.update({VideoNum: (HostID, title, VideoUrl)})
     # MyUtils.log(({VideoNum:(HostID,title,VideoUrl)}))
-    # MyUtils.log(f' Robot{index+1}:探测到未下载。准备下载增加，{len(ReadyToDownload)}')
+    # MyUtils.log(f' Detect{index+1}:探测到未下载。准备下载增加，{len(ReadyToDownload)}')
     isPageUsing[index] = 0
-    MyUtils.log(f'Robot{index + 1} {MyUtils.counttime(stole)}s')
+    MyUtils.log(f'Detect{index + 1} {MyUtils.counttime(stole)}s')
     return
 
 

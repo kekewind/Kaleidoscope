@@ -139,7 +139,7 @@ def B4():
     def tell(s):
         nonlocal lis1
         for i in lis1:
-            if MyUtils.MyTellSame(s, i):
+            if MyUtils.TellStringSame(s, i):
                 return True
         return False
 
@@ -250,7 +250,7 @@ def B7():
         for (root, dirs, files) in os.walk('./bili'):
             break
         for dir in dirs:
-            if MyUtils.MyTellSame(dir, name + '_' + UserUID):
+            if MyUtils.TellStringSame(dir, name + '_' + UserUID):
                 break
         for (root, dirs, files) in os.walk(f'./bili/{dir}'):
             break

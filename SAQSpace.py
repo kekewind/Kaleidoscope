@@ -6,7 +6,7 @@ import MyUtils
 
 droot='../QQ/QSpace/'
 User=MyUtils.RefreshTXT(droot+'User.txt')
-# page=MyUtils.MyEdge(silent=True)
+# page=MyUtils.MyEdge(show=True)
 page=MyUtils.MyChrome()
 page.set_window_size(1920,1080)
 e=MyUtils.MyThreadPool(20, show=1)

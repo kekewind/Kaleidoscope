@@ -37,20 +37,21 @@ def HostElement(l):
 def IsPic(l):
     # 传入元素，返回是否是图文（真）还是视频
     element=l[0]
-    t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div/div'],depth=9,silent=1)
+    t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div/div'], depth=9, show=MyUtils.debug)
     # 先收集普通的图文标签
     if t==None:
-        t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div/span'],depth=10,silent=1)
+        t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div/span'], depth=10, show=MyUtils.debug)
     #     收集置顶标签
     if t==None:
     #     什么标签也没有
         return False
     t=t.text
+    MyUtils.delog(f'检测到元件标签为 {t}')
     if t=='图文':
         return True
     else:
         if t=='置顶'or t=='挑战榜'or t=='热榜':
-            t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div[2]'],depth=8,silent=1)
+            t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div[2]'], depth=8, show=MyUtils.debug)
         if t==None:
             return False
         else:
