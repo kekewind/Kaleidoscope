@@ -24,11 +24,11 @@ def douyin1():
                             os.rename(path,path.strip(' - 抖音.mp4')+'.mp4')
             print(f'{dir} checked.')
     # 删除多余的那个
-    MyUtils.MyDeletedir(l)
+    MyUtils.deletedir(l)
 
 def douyin2():
     newfile=MyUtils.RefreshTXT('../抖音/Failed.txt')
-    page=MyUtils.MyEdge()
+    page=MyUtils.edge()
     l=[]
     for(root,dirs,files)in os.walk('../抖音/'):
         # 遍历每个文件夹
@@ -46,23 +46,23 @@ def douyin2():
                         # 准备删除原文件，并记录到Fail
                         l.append(os.path.abspath(f'{root}/{file}'))
                         newfile.add(f'{dir}{file}')
-    MyUtils.MyDeletedir(l)
+    MyUtils.deletedir(l)
     if not len(l):
         os.remove('../抖音/VideoSpectrum.txt')
 
 def douyin3():
     # 把like里面的标题全部check，搜索，搜索到第一个符合文案的结果，获取用户ID，转移文件到文件夹中
-    page=MyUtils.MyEdge('https://www.douyin.com')
+    page=MyUtils.edge('https://www.douyin.com')
     for (root,dirs,files)in os.walk('../抖音/like'):
         for file in files:
             # 跳过
-            MyUtils.MySkip([page, By.ID, "captcha-verify-image"])
-            MyUtils.MySkip([page, By.ID, "login-pannel"])
+            MyUtils.skip([page, By.ID, "captcha-verify-image"])
+            MyUtils.skip([page, By.ID, "login-pannel"])
             time.sleep(1)
 
             MyUtils.MyKeyInput(323,233,file.strip('.mp4'))
             time.sleep(1)
-            element=MyUtils.MyElement([page,By.XPATH,'/html/body/div[1]/div/div[2]/div/div[3]/div[1]/ul/li[1]/div/div/div[1]/div/a'])
+            element=MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div[3]/div[1]/ul/li[1]/div/div/div[1]/div/a'])
             UserUID=element.get_attribute('href')
             UserUID=UserUID[UserUID.find('user/'):UserUID.find('?')]
             time.sleep(1)
@@ -83,7 +83,7 @@ def douyin4():
     file=MyUtils.RefreshTXT('../抖音/VideoSpectrum.txt')
     exc=MyUtils.RefreshTXT('../抖音/ExceptionVideo.txt')
     ready=MyUtils.RefreshTXT('../抖音/AlreadyDownloaded.txt')
-    pagelis=[MyUtils.MyEdge() for i in range(maxworkers)]
+    pagelis=[MyUtils.edge() for i in range(maxworkers)]
     e=MyUtils.MyThreadPool(maxworkers)
     while file.loopcount<file.length():
         def detect():
@@ -135,7 +135,7 @@ def douyin5():
                         f.add(file)
                         print(f'准备删除.crdownload文件{file}')
 
-    MyUtils.MyDeletedir(deletelis)
+    MyUtils.deletedir(deletelis)
 
     while f.loopcount<f.length():
         a=f.get()
@@ -152,15 +152,15 @@ def douyin6():
     LocalUserSpectrum = MyUtils.RefreshTXT('../抖音/UserSpectrum.txt')
     LocalVideoSpectrum = MyUtils.RefreshTXT('../抖音/VideoSpectrum.txt')
     print('LocalVideo: ', LocalVideoSpectrum.length(), ' LocalUser: ', LocalUserSpectrum.length())
-def Space():
+def Space(silent=True):
     dlis=[]
     for dir in os.listdir('C:\\Users\\17371\\AppData\\Local\\Temp'):
         if dir.find('scoped_dir')>=0:
             dlis.append('C:\\Users\\17371\\AppData\\Local\\Temp\\'+dir)
             if len(dlis)>500:
-                MyUtils.MyDeletedir(dlis,silent=True)
+                MyUtils.deletedir(dlis, silent=True)
                 dlis=[]
-    MyUtils.MyDeletedir(dlis,silent=True)
+    MyUtils.deletedir(dlis, silent=True)
 
 def douyin7():
 #     检查是否有错位
@@ -171,7 +171,7 @@ def douyin7():
     for (root,dirs,files)in os.walk('../抖音'):
         for file in files:
             # 先拼路径
-            path=MyUtils.MyPath(root+'/'+file)
+            path=MyUtils.standarlizedPath(root + '/' + file)
             stat_info=os.stat(path)
             size=stat_info.st_size
             d.update({file:size})
@@ -196,7 +196,7 @@ def douyin8():
                 t=os.path.getctime(os.path.abspath(f'../抖音/{dir}/{file}'))
                 if t>999999999999999999999:
                     l.append(os.path.abspath(f'../抖音/{dir}/{file}'))
-    MyUtils.MyDeletedir(l)
+    MyUtils.deletedir(l)
 
 # douyin2()
 # douyin1()

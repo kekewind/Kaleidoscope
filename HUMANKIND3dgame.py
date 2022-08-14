@@ -6,7 +6,7 @@ import MyUtils
 for i in range(2,60):
 
     url=f'https://3g.ali213.net/gl/html/673909_{i}.html'
-    page=MyUtils.MyEdge(url)
+    page=MyUtils.edge(url)
     page.set_window_size(400,700)
     time.sleep(1)
     MyUtils.MyClick([page,By.CLASS_NAME,'read-all'])
@@ -18,14 +18,14 @@ for i in range(2,60):
     wenming=MyUtils.MyTitle([page])
     wenming=wenming[wenming.find('-')+1:wenming.find(' ')]
     txt=[]
-    for i in MyUtils.MyElements([page,By.TAG_NAME,'p']):
+    for i in MyUtils.Elements([page, By.TAG_NAME, 'p']):
         txt.append(i.text)
 
 
     if os.path.exists(MyUtils.DesktopPath('huamndkind/'+wenming+'.txt')):
         continue
-    content=MyUtils.MyTXT(MyUtils.DesktopPath('huamndkind/'+wenming+'.txt'))
-    t=MyUtils.MyTXT(MyUtils.DesktopPath('huamndkind/'+'总计'+'.txt'))
+    content=MyUtils.txt(MyUtils.DesktopPath('huamndkind/' + wenming + '.txt'))
+    t=MyUtils.txt(MyUtils.DesktopPath('huamndkind/' + '总计' + '.txt'))
     c=False
     next=False
     b=False

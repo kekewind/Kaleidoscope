@@ -8,7 +8,7 @@ import MyUtils
 
 # 打开主网页，获取信息
 txt=MyUtils.RefreshTXT('../浙江大学课堂/cache.txt')
-page=MyUtils.MyChrome(mine=True)
+page=MyUtils.chrome(mine=True)
 result=[]
 while True:
     URL=txt.get()
@@ -17,12 +17,12 @@ while True:
         break
     page.get(URL)
     Lecture=MyUtils.MyTitle([page])
-    Teacher=MyUtils.MyElement([page,By.XPATH,'/html/body/main/section/div[1]/div/div[2]']).text.strip("发布教师：")
-    Spectrum=MyUtils.MyElements([page,By.XPATH,'//a[starts-with(@href,"https://classroom")]'])
+    Teacher=MyUtils.Element([page, By.XPATH, '/html/body/main/section/div[1]/div/div[2]']).text.strip("发布教师：")
+    Spectrum=MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"https://classroom")]'])
 
     # 检查是否已经全部保存
-    All=MyUtils.MyElements([page,By.XPATH,'/html/body/main/section/div[2]/div/div/div/ul/li/ul/li'])
-    MyUtils.MyCreatePath(f'../浙江大学课堂/{Lecture}{Teacher}')
+    All=MyUtils.Elements([page, By.XPATH, '/html/body/main/section/div[2]/div/div/div/ul/li/ul/li'])
+    MyUtils.CreatePath(f'../浙江大学课堂/{Lecture}{Teacher}')
     number=0
     for (root,dirs,files)in os.walk(f'../浙江大学课堂/{Lecture}{Teacher}'):
         number=len(files)
@@ -46,7 +46,7 @@ while True:
         result.append(title)
         if not os.path.exists(f'../浙江大学课堂/{Lecture}{Teacher}/{title}.mp4'):
             print(f"Downloading{title}")
-            MyUtils.MyRequestDownload(f'../浙江大学课堂/{Lecture}{Teacher}/{MyUtils.MyTitle([page])}.mp4','wb',MyUtils.MyElement([page,By.XPATH,'/html/body/div[1]/div[2]/div/div/div[1]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/div[1]/video']).get_attribute('src'))
+            MyUtils.requestdownload(f'../浙江大学课堂/{Lecture}{Teacher}/{MyUtils.MyTitle([page])}.mp4', 'wb', MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div[2]/div/div/div[1]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/div[1]/video']).get_attribute('src'))
             print('Download complete.')
 
 print(result)

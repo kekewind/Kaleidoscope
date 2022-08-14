@@ -28,12 +28,12 @@ def Download():
             continue
 
         description = (video['description'])
-        f=MyUtils.MyTXT(f'../bili/{UserID}_{UserUID}/{title}_{bvid}/简介.txt')
+        f=MyUtils.txt(f'../bili/{UserID}_{UserUID}/{title}_{bvid}/简介.txt')
         f.add(description)
         f.save()
         if (os.path.exists(f'../bili/{UserID}_{UserUID}/{title}_{bvid}/cover.jpg')):
             continue
-        MyUtils.MyRequestDownload(f'../bili/cover/{UserID}/{title}_{bvid}/cover.jpg', 'wb', video['pic'])
+        MyUtils.requestdownload(f'../bili/cover/{UserID}/{title}_{bvid}/cover.jpg', 'wb', video['pic'])
         print(f'视频信息下载完成{UserID}-{title}')
     Download()
 

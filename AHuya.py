@@ -24,7 +24,7 @@ while file.loopcount < file.length():
     if os.path.exists(droot + f'\\{file.loopcount + 1}') and not (droot + f'\\{file.loopcount + 1}') in l:
         file.Rollback()
         continue
-    e.excute(MyUtils.MyPageDownload, file.Rollback(), droot + f'\\{file.loopcount}\\{file.loopcount}.ts')
+    e.excute(MyUtils.pagedownload, file.Rollback(), droot + f'\\{file.loopcount}\\{file.loopcount}.ts')
     print(droot + f'\\{file.loopcount}\\{file.loopcount}.ts下载中')
     # 限制片段
     if file.loopcount%10==0:
@@ -57,7 +57,7 @@ count = 0
 for i in range(max(l)):
     count += 1
     for (roots, dirs, files) in os.walk(droot + f'\\{i}'):
-        s += MyUtils.MyPath(droot + '\\' + str(i) + '\\' + files[0]) + '|'
+        s += MyUtils.standarlizedPath(droot + '\\' + str(i) + '\\' + files[0]) + '|'
     if count > 100:
         count = 0
         slist.append(s)
@@ -65,10 +65,10 @@ for i in range(max(l)):
 
 # 批处理
 # i=0
-# for s in slist:
+# for l in slist:
 #     i+=1
-#     ss=(f'ffmpeg -i "concat:{s}" -acodec copy -vcodec copy -absf aac_adtstoasc F:/虎牙/clip/{i}.mp4')
-#     os.system(f'ffmpeg -i "concat:{s}" -acodec copy -vcodec copy -absf aac_adtstoasc F:/虎牙/clip/{i}.ts')
+#     ss=(f'ffmpeg -i "concat:{l}" -acodec copy -vcodec copy -absf aac_adtstoasc F:/虎牙/clip/{i}.mp4')
+#     os.system(f'ffmpeg -i "concat:{l}" -acodec copy -vcodec copy -absf aac_adtstoasc F:/虎牙/clip/{i}.ts')
 
 # mp4->ts
 path = 'F:/虎牙'
@@ -84,5 +84,5 @@ l = ''
 for (roots, dirs, files) in os.walk('F:/虎牙/clip'):
     for file in files:
         if file[-3:] == '.ts':
-            l += MyUtils.MyPath(roots + '\\' + file + '|')
+            l += MyUtils.standarlizedPath(roots + '\\' + file + '|')
 os.system(f'ffmpeg -i "concat:{l}" -acodec copy -vcodec copy -absf aac_adtstoasc F:/虎牙/output.mp4')

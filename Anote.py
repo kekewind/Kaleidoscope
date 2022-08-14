@@ -2,9 +2,9 @@ import pyperclip
 
 import MyUtils
 # 初始化
-path=MyUtils.MyPath('D:\Kaleidoscope\self/语录&随笔随想')
+path=MyUtils.standarlizedPath('D:\Kaleidoscope\self/语录&随笔随想')
 root=('D:\Kaleidoscope\self/语录&随笔随想')
-f0=MyUtils.MyTXT(root+'/count.txt')
+f0=MyUtils.txt(root + '/count.txt')
 inc=0
 c=''
 cc=''
@@ -16,7 +16,7 @@ while True:
     # 找到对应文件
     hun=count//100
     sname=f'/{hun*100+1}-{hun*100+100}.txt'
-    f1=MyUtils.MyTXT(root+sname)
+    f1=MyUtils.txt(root + sname)
 
     # 进行增加
     # print(MyUtils.MyTime())

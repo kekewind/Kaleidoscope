@@ -21,25 +21,25 @@ likecount={}
 
 try:
     # 登录
-    page = MyUtils.MyEdge('https://www.douyin.com/user/MS4wLjABAAAAPw9P0loZpA5wjaWiHzxQb4B9E2Jgt4ZPWfiycyO_E4Q')
+    page = MyUtils.edge('https://www.douyin.com/user/MS4wLjABAAAAPw9P0loZpA5wjaWiHzxQb4B9E2Jgt4ZPWfiycyO_E4Q')
     time.sleep(3)
-    MyUtils.MySkip([page, By.ID, "captcha-verify-image"])
-    MyUtils.MySkip([page, By.ID, "login-pannel"])
+    MyUtils.skip([page, By.ID, "captcha-verify-image"])
+    MyUtils.skip([page, By.ID, "login-pannel"])
     time.sleep(3)
 
     # 转到喜欢页面
     # page.get(MyUtils.MyElement([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/user/")]']).get_attribute('href'))
     # time.sleep(1)
-    LikeElement=MyUtils.MyElement([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[4]/div[1]/div[1]/div[2]/span'])
+    LikeElement=MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[4]/div[1]/div[1]/div[2]/span'])
     LikeNum=LikeElement.text
     LikeElement.click()
 
     # 下滚，保存列表
     time.sleep(2)
-    MyUtils.MyScroll([page])
+    MyUtils.scroll([page])
     WebUserSpectrum = []
     VideoList=[]
-    for VideoElement in MyUtils.MyElements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]']):
+    for VideoElement in MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]']):
         VideoUrl = VideoElement.get_attribute('href')
         VideoNum = VideoUrl[29:len(VideoUrl)]
         VideoList.append(VideoNum)
@@ -52,10 +52,10 @@ try:
 
 
         # 跳过验证
-        MyUtils.MySkip([page, By.ID, "captcha-verify-image"])
+        MyUtils.skip([page, By.ID, "captcha-verify-image"])
 
         # 跳过直播
-        UserUrl=MyUtils.MyElement([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[1]/div[1]/a']).get_attribute('href')
+        UserUrl=MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[1]/div[1]/a']).get_attribute('href')
         if UserUrl.rfind('live')>0:
             continue
 
@@ -77,20 +77,20 @@ try:
             continue
 
         # 获取title
-        title = MyUtils.MyElement([page, By.XPATH, '//head/title[1]']).get_attribute('text')
+        title = MyUtils.Element([page, By.XPATH, '//head/title[1]']).get_attribute('text')
         title = title[0:len(title) - 5]
         title = MyUtils.MyName(title)
 
         # 获取UserID
-        s = MyUtils.MyElement([page, By.XPATH, '/html/head/meta[3]']).get_attribute('content')
+        s = MyUtils.Element([page, By.XPATH, '/html/head/meta[3]']).get_attribute('content')
         UserID = s[s.rfind(' - ') + 3:s.rfind('发布在抖音，已经收获了') - 9]
 
         # 下载
-        VideoUrl = MyUtils.MyElement([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div[1]/div/div[2]/div[2]/xg-video-container/video/source[1]']).get_attribute(
+        VideoUrl = MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div[1]/div/div[2]/div[2]/xg-video-container/video/source[1]']).get_attribute(
             'src')
         path = '../抖音/' + UserID
-        MyUtils.MyCreatePath(path)
-        MyUtils.MyRequestDownload(f'{path}/{title}.mp4','wb',VideoUrl)
+        MyUtils.CreatePath(path)
+        MyUtils.requestdownload(f'{path}/{title}.mp4', 'wb', VideoUrl)
         LocalVideoSpectrum.add(VideoNum)
         print(f'[抖音] {UserID}-{title}  下载完成，添加记录完成（安全）。')
         print(f'{VideoUrl}')

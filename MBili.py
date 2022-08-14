@@ -98,10 +98,10 @@ def B2():
     MyUtils.MyDeleteEmpty('./bili/cover')
     for (root, dirs, files) in os.walk('./bili/cover'):
         break
-    page = MyUtils.MyChrome(mine=1)
+    page = MyUtils.chrome(mine=1)
     for dir in dirs:
         page.get(url='https://search.bilibili.com/all?from_source=webtop_search&&keyword=' + dir)
-        a = MyUtils.MyElement([page, By.XPATH, '/html/body/div[3]/div[1]/div[1]/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/a'], depth=7)
+        a = MyUtils.Element([page, By.XPATH, '/html/body/div[3]/div[1]/div[1]/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/a'], depth=7)
         if a == None:
             continue
         ss = a.get_attribute('href')
@@ -115,7 +115,7 @@ def B2():
                 videouserspectrum.add(UID)
                 videouserspectrum.save()
         else:
-            MyUtils.MyDeletedir('./bili/cover/' + dir)
+            MyUtils.deletedir('./bili/cover/' + dir)
     time.sleep(9999)
     page.close()
     MyUtils.MyDeleteEmpty('./bili/cover')
@@ -165,7 +165,7 @@ def B4():
     # 先删除文件，再删除空文件夹。
     os.chdir('E:/')
     dlis=MyUtils.RefreshTXT(MyUtils.DesktopPath('dlis.txt')).l
-    MyUtils.MyDeletedir(dlis)
+    MyUtils.deletedir(dlis)
     MyUtils.MyDeleteEmpty('E:/bili/download')
 
 

@@ -6,7 +6,7 @@ import MyUtils
 import time
 
 cc = ''
-f=MyUtils.MyTXT(MyUtils.MyPath('D:/Kaleidoscope/self/20MINUTES/'+MyUtils.MyDate('.txt')))
+f=MyUtils.txt(MyUtils.standarlizedPath('D:/Kaleidoscope/self/20MINUTES/' + MyUtils.MyDate('.txt')))
 c=[]
 
 def record():

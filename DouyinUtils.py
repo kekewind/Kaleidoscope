@@ -1,62 +1,42 @@
-import _thread
-import os
-import re
 import sys
-import time
-from concurrent.futures import ThreadPoolExecutor
 
-import cv2
-import prompt_toolkit.clipboard.pyperclip
-import prompt_toolkit.clipboard.pyperclip
-import pyautogui
-import pyperclip
-import requests
-import selenium
-from selenium import webdriver
-from selenium.webdriver import ActionChains
+import selenium.webdriver.remote.webelement
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import WebDriverWait
-import Levenshtein
-from PIL import Image
+
 import MyUtils
+import json
+
 
 def HostPieces(l):
     # 传入页面，返回页面上的所有pieces
     page=l[0]
-    return MyUtils.MyElements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]'])
+    ret=MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]'])
+    MyUtils.delog(f'准备操作的作品列表长度：{len(ret)}')
+    return ret
 
 def HostElement(l):
     # 传入主页的作品元素，返回元素的Url，链接
     VideolElement=l[0]
     elementurl = VideolElement.get_attribute('href')
-    VideoNum = elementurl[elementurl.rfind('/') + 1:len(elementurl)]
+    if elementurl.find('?')>0:
+        VideoNum = elementurl[elementurl.rfind('/') + 1:elementurl.find('?')]
+    else:
+        VideoNum = elementurl[elementurl.rfind('/') + 1:]
     return (elementurl,VideoNum)
 
 def IsPic(l):
     # 传入元素，返回是否是图文（真）还是视频
-    element=l[0]
-    t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div/div'], depth=9, show=MyUtils.debug)
-    # 先收集普通的图文标签
-    if t==None:
-        t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div/span'], depth=10, show=MyUtils.debug)
-    #     收集置顶标签
-    if t==None:
-    #     什么标签也没有
-        return False
-    t=t.text
-    MyUtils.delog(f'检测到元件标签为 {t}')
-    if t=='图文':
-        return True
-    else:
-        if t=='置顶'or t=='挑战榜'or t=='热榜':
-            t=MyUtils.MyElement([element, By.XPATH, './div/div[3]/div[2]'], depth=8, show=MyUtils.debug)
-        if t==None:
-            return False
-        else:
+    # 如果没有消除二维码页面，会冻结检测。
+    page=l[0]
+    element=l[1]
+    elements=MyUtils.Elements([element, By.XPATH, './div/div[3]/div'], depth=9)
+    # 第一、二、三个标签
+    # 思路是找到一个图文标签即可
+    for el in elements:
+        if not None==MyUtils.Element([el,By.XPATH,'./div'], depth=9):
+            # svg找不到
             return True
-
+    return False
 
 def Title(l):
     # 传入网页，返回作品标题
@@ -67,4 +47,19 @@ def Title(l):
     else:
         print(f'[DouyinUtils][Title] 获取title 失败。you may try {page.current_url}')
 
-MyUtils.log('DouyinUtils loaded.')
+def PieceInfo():
+    disk=''
+    url=''
+    author=''
+    UserUID=''
+    num=0
+    type=''
+    title=''
+    return {'dick':disk,'url':url,'author':author,'num':num,'type':type,'UserUID':UserUID,'title':title}
+
+def simplinfo(num,author,title):
+    return json.dumps({str(num):{'disk':MyUtils.hashdisk,'author':author,'title':title}},ensure_ascii=False)
+    # return json.dumps({str(num):{'disk':MyUtils.hashdisk,'author':author,'title':title}},ensure_ascii=True)
+#   上面这个把中文转码
+
+MyUtils.tip('DouyinUtils loaded.')

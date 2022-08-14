@@ -15,8 +15,8 @@ import MyUtils
 
 
 def Cache():
-    MyUtils.MyCreatePath(f'{path}/clip')
-    l = MyUtils.MyFile('r', '../影视/cache.txt')
+    MyUtils.CreatePath(f'{path}/clip')
+    l = MyUtils.file('r', '../影视/cache.txt')
     global HostUrl, CurrentEP
     HostUrl = l[0].strip('\n')
     if len(l) > 1:
@@ -27,11 +27,11 @@ def Cache():
 
 def GetM3U8andInfo():
     global name, CurrentEP, TotalEP, HostUrl
-    page = MyUtils.MyChrome(HostUrl,mine=1)
+    page = MyUtils.chrome(HostUrl, mine=1)
     time.sleep(1)
-    name = MyUtils.MyElement([page, By.XPATH, '/html/body/div[2]/div[1]/header/img']).get_attribute('alt')
+    name = MyUtils.Element([page, By.XPATH, '/html/body/div[2]/div[1]/header/img']).get_attribute('alt')
     name = name.replace(' ', '')
-    TotalEP = len(MyUtils.MyElements([page, By.XPATH, '/html/body/div[2]/div[1]/div[2]/div/div/div[2]/ul[1]/li']))
+    TotalEP = len(MyUtils.Elements([page, By.XPATH, '/html/body/div[2]/div[1]/div[2]/div/div/div[2]/ul[1]/li']))
     print(f'获取参数{name},{CurrentEP}/{TotalEP}')
     # 如果已存在路径，直接检索，并把CurrentEP==1更新为CurrentEP
     # if os.path.exists(f'../影视/{name}'):
@@ -40,7 +40,7 @@ def GetM3U8andInfo():
     #         if CurrentEP > TotalEP:
     #             sys.exit()
     #         break
-    MyUtils.MyCreatePath(f'../影视/{name}')
+    MyUtils.CreatePath(f'../影视/{name}')
     # 如果存在m3u8直接退出
     if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
         return
@@ -48,7 +48,7 @@ def GetM3U8andInfo():
     MyUtils.MyClick([page, By.XPATH, f'/html/body/div[2]/div[1]/div[2]/div/div/div[2]/ul/li[{CurrentEP}]'])
 
 
-    if MyUtils.MyElement([page, By.XPATH, '/html/body/div/div/div/img'], depth=9):
+    if MyUtils.Element([page, By.XPATH, '/html/body/div/div/div/img'], depth=9):
         MyUtils.MyClick([page, By.XPATH, '/html/body/div/div/div/img'])
     # 再检查一次m3u8，如果此时手动下载了，直接退出
     time.sleep(5)
@@ -69,7 +69,7 @@ def GetM3U8andInfo():
     time.sleep(2)
     page.switch_to.window(page.window_handles[-1])
     # 可能出现子集链接m3u8
-    PossibleElement = MyUtils.MyElement([page, By.XPATH, '/html/body/div/table/tbody/tr[2]/td/div[3]/p/a'], depth=8)
+    PossibleElement = MyUtils.Element([page, By.XPATH, '/html/body/div/table/tbody/tr[2]/td/div[3]/p/a'], depth=8)
     if not PossibleElement == None:
         PossibleElement.click()
     time.sleep(1)
@@ -82,7 +82,7 @@ def GetM3U8andInfo():
     GetM3U8andInfo()
 
 def Download():
-    Sections = MyUtils.MyFile('r', 'C:/Users/17371/Downloads/m3u8.txt')
+    Sections = MyUtils.file('r', 'C:/Users/17371/Downloads/m3u8.txt')
     print('开始下载')
     inc = 0
     e=MyUtils.MyThreadPool(20)
@@ -92,7 +92,7 @@ def Download():
             print(f'{name}：EP{CurrentEP}:{inc}/{len(Sections)}  Path:{os.path.abspath(path)}')
             continue
         # MyUtils.MyPageDownload(url,path + f'/{inc}.mp4')
-        e.excute(MyUtils.MyRequestDownload, path + f'/{inc}.mp4', 'wb', url)
+        e.excute(MyUtils.requestdownload, path + f'/{inc}.mp4', 'wb', url)
         # print(f'{name}：EP{CurrentEP}:{inc}/{len(Sections)}  Path:{os.path.abspath(path)}下载中')
     print(f'等待下载完成（剩余working: {e.cool}）')
     # while not os.path.exists(os.path.abspath(path+f'/{inc}.mp4')):
@@ -118,7 +118,7 @@ def Combine():
         for file in files:
             count += 1
             # 去掉虚假图片头
-            l = MyUtils.MyFile('rb', path + '/' + file)
+            l = MyUtils.file('rb', path + '/' + file)
             # 无关字节数组长度统计
             sum = 0
             index = MyUtils.MyBiFind(path + '/' + file)
@@ -127,7 +127,7 @@ def Combine():
                     sum += len(l[0])
                     l.pop(0)
                 l[0] = l[0][index - sum:]
-                MyUtils.MyFile('wb', path + '/' + file, l)
+                MyUtils.file('wb', path + '/' + file, l)
                 print(f'{file}/{len(files)}已重写')
                 str += path + '/' + file + '|'
             except:
@@ -183,7 +183,7 @@ while True:
         Cache()
     TotalEP = 99
     while CurrentEP <= TotalEP:
-        MyUtils.MyCreatePath(path)
+        MyUtils.CreatePath(path)
         GetM3U8andInfo()  # 获取TotalUrl,M3U8,名字
         while not os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
             GetM3U8andInfo()  # 获取TotalUrl,M3U8,名字
@@ -193,6 +193,6 @@ while True:
         # 1EP结束
         CurrentEP += 1
         Remove()
-        MyUtils.MyFile('w', f'../影视/cache.txt', [str(HostUrl) + '\n', str(CurrentEP) + '\n', str(step) + '\n'])
+        MyUtils.file('w', f'../影视/cache.txt', [str(HostUrl) + '\n', str(CurrentEP) + '\n', str(step) + '\n'])
     HostUrl = input('输入新的蛋蛋赞电影网址：')
-    MyUtils.MyFile('w', f'../影视/cache.txt', [str(HostUrl) + '\n', str(CurrentEP) + '\n', str(step) + '\n'])
+    MyUtils.file('w', f'../影视/cache.txt', [str(HostUrl) + '\n', str(CurrentEP) + '\n', str(step) + '\n'])
