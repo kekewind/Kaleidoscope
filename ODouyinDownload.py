@@ -14,7 +14,7 @@ MyUtils.Debug()
 def end():
     LocalUserSpectrum.save()
     Distripute.save()
-    MyUtils.dicttofile(Distripute, './抖音/Distripute.txt')
+    MyUtils.dicttofile(Distripute, './抖音/AllPieces.txt')
     MyUtils.log(f'已下载{Distripute.length()} 用户数量{LocalUserSpectrum.length()} 失败数{Failed.length()}')
     DouyinHost.quit()
     sys.exit()
@@ -147,7 +147,7 @@ if __name__=='__main__':
     Failed = MyUtils.RefreshTXT('/抖音/Failed.txt')
     LocalUserSpectrum = MyUtils.RefreshTXT('/抖音/UserSpectrum.txt')
     # Distripute = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/VideoSpectrum.txt')
-    Distripute=MyUtils.RefreshJson('/抖音/Distripute.txt')
+    Distripute=MyUtils.RefreshJson('抖音/AllPieces.txt')
     MyUtils.log(f'LocalVideo:{Distripute.length()} LocalUser:{LocalUserSpectrum.length()} Failed:{Failed.length()}')
     ReadyToDownload = {}
     DouyinSum = 1

@@ -64,7 +64,7 @@ try:
         # LocalUserSpectrum.add(UserUID)
 
         # 取消喜欢
-        MyUtils.MyClick([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[1]'])
+        MyUtils.click([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[1]'])
         time.sleep(2)
 
         # # 跳过UserUID已经记录的

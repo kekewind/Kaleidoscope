@@ -24,7 +24,7 @@ while User.loopcount<User.length():
         print('[Main] 下载二维码中')
         MyUtils.MyScreenShot(MyUtils.PicCachePath(f'{name}.png'),[page],whole=1,show=1)
         print('[Main] 二维码下载完成')
-        MyUtils.deletedir(MyUtils.PicCachePath(f'{name}.png'))
+        MyUtils.deletedirandfile(MyUtils.PicCachePath(f'{name}.png'))
         page.switch_to.default_content()
         # MyUtils.MySkip([page,By.ID,'qrlogin_img'])
         MyUtils.skip([page, By.ID, 'login_frame'])

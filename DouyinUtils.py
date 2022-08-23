@@ -5,12 +5,23 @@ from selenium.webdriver.common.by import By
 
 import MyUtils
 import json
+import time
 
 
 def HostPieces(l):
     # 传入页面，返回页面上的所有pieces
     page=l[0]
-    ret=MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]'])
+    ret=[]
+    l1=MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"/video/")]'],depth=9)
+    l2=MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/note/")]'],depth=9)
+    l3=MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]'],depth=9)
+    ret=MyUtils.extend(ret,l1)
+    ret=MyUtils.extend(ret,l2)
+    ret=MyUtils.extend(ret,l3)
+
+    if ret==[]:
+        MyUtils.warn('获取视频元素列表错误。')
+        sys.exit(0)
     MyUtils.delog(f'准备操作的作品列表长度：{len(ret)}')
     return ret
 
@@ -49,17 +60,31 @@ def Title(l):
 
 def PieceInfo():
     disk=''
-    url=''
     author=''
-    UserUID=''
     num=0
     type=''
     title=''
     return {'dick':disk,'url':url,'author':author,'num':num,'type':type,'UserUID':UserUID,'title':title}
 
 def simplinfo(num,author,title):
-    return json.dumps({str(num):{'disk':MyUtils.hashdisk,'author':author,'title':title}},ensure_ascii=False)
-    # return json.dumps({str(num):{'disk':MyUtils.hashdisk,'author':author,'title':title}},ensure_ascii=True)
+    return json.dumps({str(num):{'disk':MyUtils.diskname, 'author':author, 'title':title}}, ensure_ascii=False)
+    # return json.dumps({str(num):{'disk':MyUtils.hashcode,'author':author,'title':title}},ensure_ascii=True)
 #   上面这个把中文转码
 
+def getPiecesNum(l):
+    page=l[0]
+    MyUtils.setscrolltop([page, 0])
+    time.sleep(0.2)
+    l1 = MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[4]/div[1]/div[1]/div[1]/span'],depth=9)
+    l2 = MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div/div/div[1]/span[2]'],depth=9)
+    ret=0
+    if not l1==None:
+        ret= int(l1.text)
+    elif not l2==None:
+        ret= int(l2.text)
+    MyUtils.delog(f'作品数量：{ret}')
+    return ret
+
+
 MyUtils.tip('DouyinUtils loaded.')
+

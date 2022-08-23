@@ -9,7 +9,7 @@ for i in range(2,60):
     page=MyUtils.edge(url)
     page.set_window_size(400,700)
     time.sleep(1)
-    MyUtils.MyClick([page,By.CLASS_NAME,'read-all'])
+    MyUtils.click([page, By.CLASS_NAME, 'read-all'])
     time.sleep(1)
 
 

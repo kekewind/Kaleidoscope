@@ -26,14 +26,14 @@ import MyUtils
 #
 # # 先Maintainace'
 
-# t=MyUtils.RefreshTXT(f'D:/Kaleidoscope/bili/CoverSpectrum.txt')
+# count=MyUtils.RefreshTXT(f'D:/Kaleidoscope/bili/CoverSpectrum.txt')
 # path='E:/bili/cover/'
-# for i in t.l:
+# for i in count.l:
 #     id=upid(i)
 #     print((id,i))
 #     if id==None:
-#         t.delete(i)
-#         t.save()
+#         count.delete(i)
+#         count.save()
 #         continue
 #     if not os.path.exists(path+id):
 #         continue
@@ -115,7 +115,7 @@ def B2():
                 videouserspectrum.add(UID)
                 videouserspectrum.save()
         else:
-            MyUtils.deletedir('./bili/cover/' + dir)
+            MyUtils.deletedirandfile('./bili/cover/' + dir)
     time.sleep(9999)
     page.close()
     MyUtils.MyDeleteEmpty('./bili/cover')
@@ -165,7 +165,7 @@ def B4():
     # 先删除文件，再删除空文件夹。
     os.chdir('E:/')
     dlis=MyUtils.RefreshTXT(MyUtils.DesktopPath('dlis.txt')).l
-    MyUtils.deletedir(dlis)
+    MyUtils.deletedirandfile(dlis)
     MyUtils.MyDeleteEmpty('E:/bili/download')
 
 

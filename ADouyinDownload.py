@@ -9,13 +9,14 @@ from selenium.webdriver.common.by import By
 import DouyinUtils
 import Maintainace
 import MyUtils
-
-# 变量
-Failed = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/Failed.txt')
-record=MyUtils.RefreshJson('D:/Kaleidoscope/抖音/Distripute.txt')
-readytoDownload=MyUtils.cache('D:/Kaleidoscope/抖音/ReadytoDownload.txt')
+import MDouyin
 
 def download():
+    # 变量
+    Failed = MyUtils.Json('D:/Kaleidoscope/抖音/Failed.txt')
+    record=MyUtils.Json('D:/Kaleidoscope/抖音/AllPieces.txt')
+    readytoDownload=MyUtils.cache('D:/Kaleidoscope/抖音/ReadytoDownload.txt')
+
     # 下载
     while True:
         stole = MyUtils.now()
@@ -34,8 +35,9 @@ def download():
             # region
             MyUtils.delog(f'开始下载，url={VideoUrl[0]}')
             try:
-                t = MyUtils.pagedownload(url=VideoUrl[0], path=f'{path}/{title}.mp4')
-            except Exception:
+                t = MyUtils.pagedownload(url=VideoUrl[0], path=f'{path}/{title}.mp4',t=15)
+            except Exception as e:
+                MyUtils.warn(e)
                 t = False
             #     endregion
         else:
@@ -46,7 +48,11 @@ def download():
             for url in VideoUrl:
                 i += 1
                 MyUtils.delog(f'开始下载，url={url}')
-                t = MyUtils.pagedownload(url=url, path=f'{path}/{title}/{i}.png') and t
+                try:
+                    t = MyUtils.pagedownload(url=url, path=f'{path}/{title}/{i}.png',t=7) and t
+                except Exception as e:
+                    MyUtils.warn(e)
+                    t = False
             #     endregion
 
         # 是否下载成功
@@ -62,6 +68,10 @@ def download():
         MyUtils.log(f'cost{MyUtils.counttime(stole)}')
         # endregion
 
-download()
+# 持续性唤醒
+while True:
+    time.sleep(15)
+    download()
+    MyUtils.log('下载队列已空。Downloader 等待中...')
 
 

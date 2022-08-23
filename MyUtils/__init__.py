@@ -31,7 +31,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 # 时间
 # region
 
-
 def now():
     return str(datetime.datetime.now())
 
@@ -86,6 +85,7 @@ def Debug():
 
 
 def Run():
+    global debug
     debug = None
 
 
@@ -104,37 +104,42 @@ def Input(x, y, s):
     time.sleep(1)
 
 
-def TellStringSame(s1, s2):
+def TellStringSame(s1, s2,ratio=0.7):
     s1 = str(s1)
     s2 = str(s2)
-    ratio = 0.95
     if len(s1) > 3 and len(s2) > 3:
         if s1.rfind(s2) > 0 or s2.rfind(s1) > 0:
             return True
-    # 进行保护，如果不是String直接返回False
-    sum1 = 0
-    # s1中能在s2里找到的个数
-    sum2 = 0
-    for i in s1:
-        if i in s2:
-            sum1 += 1
-    for i in s2:
-        if i in s1:
-            sum2 += 1
-    if sum1 / len(s1) > ratio or sum2 / len(s2) > ratio:
-        return True
-    else:
+    if len(s1)/len(s2)<ratio/2 or len(s2)/len(s1)<ratio/2:
         return False
 
+    if len(s1)>5:
+        for i in range(int(len(s1)*(1-ratio))):
+            if s1[i:min(len(s1),i+int(len(s1)*ratio))] in s2:
+                return True
+    if len(s2)>5:
+        for i in range(int(len(s2)*(1-ratio))):
+            if s2[i:min(len(s2),i+int(len(s2)*ratio))] in s1:
+                return True
+    return False
+
+
+
+def tellstringsame(s1,s2):
+    # 只对中文开放
+    return TellStringSame(s1,s2)
 
 def info(s):
     # 综合返回磁盘空间、文件夹或者文件信息、变量大小和类型
-
+    if type(s)in [int,]:
+        warn(f'用法错误。传入参数为{type(s)}类型')
+        return
     if len(s) == 1 and type(s) == str:
         gb = 1024 ** 3  # GB == gigabyte
         try:
             total_b, used_b, free_b = shutil.disk_usage(s.strip('\n') + ':')  # 查看磁盘的使用情况
-        except:
+        except Exception as e:
+            warn(e)
             return 0
         # print('总的磁盘空间: {:6.2f} GB '.format(total_b / gb))
         # print('已经使用的 : {:6.2f} GB '.format(used_b / gb))
@@ -144,7 +149,8 @@ def info(s):
     if type(s) != str or type(s) == str and not os.path.exists(s[:224]):
         try:
             tip(f'类型：{type(s)} 大小：{int(int(sys.getsizeof(s) / 1024 / 1024 * 100) / 100.0)}MB 内存地址：{id(s)} 长度{len(list(s))}')
-        except:
+        except Exception as e:
+            warn(e)
             tip(f'类型：{type(s)} 大小：{int(int(sys.getsizeof(s) / 1024 / 1024 * 100) / 100.0)}MB 内存地址：{id(s)}')
             return '用法错误。可能是调用了print(provisional.info)导致的。'
         return
@@ -219,7 +225,7 @@ headers = {
     }
 
 
-def Element(l, depth=0, show=debug):
+def Element(l, depth=0,silent=None):
     """
     返回元素，找不到为None
     :param l:
@@ -234,16 +240,18 @@ def Element(l, depth=0, show=debug):
     else:
         depth += 1
         time.sleep(2)
-        if show:
-            tip(f'Element not found, retrying... method={method}, string={s}')
+        if not silent and not debug:
+            tip(f'元素未找到，重试... method={method}, string={s}')
         if depth >= 10:
-            warn(f'未获取到元素。 method={method},str={s}')
+            if not silent:
+                warn(f'最终未获取到元素。 method={method},str={s}')
             return None
         else:
-            return Element(l, depth, show)
+            return Element(l, depth, silent)
 
 
-def Elements(l, depth=0, show=debug):
+
+def Elements(l, depth=0, silent=None):
     """
     返回元素列表，找不到为[]
     :param l:
@@ -258,12 +266,14 @@ def Elements(l, depth=0, show=debug):
     else:
         depth += 1
         time.sleep(2)
-        if show:
-            tip(f'Element not found, retrying... method={method}, string={s}')
+        if not silent and not debug:
+            tip(f'元素未找到，重试... method={method}, string={s}')
         if depth >= 10:
+            if not silent:
+                warn(f'最终未获取到元素。 method={method},str={s}')
             return []
         else:
-            return Elements(l, depth)
+            return Elements(l, depth,silent)
 
 
 def skip(l):
@@ -276,10 +286,10 @@ def skip(l):
     method = l[1]
     s = l[2]
     time.sleep(1)
-    if Element([page, method, s], depth=8):
+    if Element([page, method, s], depth=8,silent=True):
         print(s, 'detected. 等待其消失中以继续。。。')
         WebDriverWait(page, 9999, 3).until_not(expected_conditions.presence_of_element_located(locator=(method, s)))
-
+        time.sleep(2)
 
 def getscrolltop(l):
     page = l[0]
@@ -297,7 +307,7 @@ def scroll(l, silent=None):
     :param l: 页面，第二个参数小于1可不传
     :return:
     """
-    log('Scrolling..')
+    log('滚动中..')
     ti = time.time()
     page = l[0]
     ratio = 1
@@ -347,7 +357,7 @@ def scroll(l, silent=None):
         page.execute_script(f'document.documentElement.scrollTop=document.documentElement.scrollHeight-20')
         time.sleep(1)
         page.execute_script(f'document.documentElement.scrollTop=document.documentElement.scrollHeight*{ratio}')
-    log(f'scrolling Done. Spent {time.time() - ti} l.')
+    log(f'滚动完毕。 {time.time() - ti} s.')
 
 
 def requestdownload(LocalPath, mode, url):
@@ -364,7 +374,7 @@ def requestdownload(LocalPath, mode, url):
             requestdownload(LocalPath, mode, url)
 
 
-def chrome(url='', time=100, mine=None, silent=None):
+def chrome(url='', mine=None, silent=None,time=100):
     try:
         options = webdriver.ChromeOptions()
         if not mine == None:
@@ -383,6 +393,24 @@ def chrome(url='', time=100, mine=None, silent=None):
         c = input('please close old page')
         return chrome()
 
+class Edge():
+    def __init__(self,url='',silent=None):
+        self.driver=edge(url=url,silent=silent)
+    def click(self,s):
+        return click([self.driver,By.XPATH,s])
+    def element(self,s):
+        return Element([self.driver,By.XPATH,s])
+    def elements(self,s):
+        return Elements([self.driver,By.XPATH,s])
+    def scroll(self):
+        scroll([self.driver])
+    def __del__(self):
+        self.driver.quit()
+
+class Chrome(Edge):
+    def __init__(self,url='', mine=None, silent=None,time=100):
+        self.driver=chrome(url,mine=mine,silent=silent,time=time)
+
 
 def edge(url='', silent=None):
     options = webdriver.EdgeOptions()
@@ -393,7 +421,7 @@ def edge(url='', silent=None):
     except selenium.common.exceptions.SessionNotCreatedException:
         print('貌似msedgedriver.exe版本过低。已经自动复制网址链接。请打开浏览器进行下载。')
         pyperclip.copy('https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/')
-        sys.exit()
+        sys.exit(-1)
     finally:
         ()
     if not url == '':
@@ -401,17 +429,17 @@ def edge(url='', silent=None):
     return driver
 
 
-def MyClick(l):
+def click(l):
     if len(l) > 2:
         try:
-            Element().click()
+            Element(l).click()
             return
         except:
             try:
                 ActionChains(l[0]).move_to_element(to_element=Element(l)).click().perform()
                 return
-            except:
-                print('click error！')
+            except Exception as e:
+                warn(['click error！',e])
     else:
         page = l[0]
         element = l[1]
@@ -422,8 +450,8 @@ def MyClick(l):
             try:
                 ActionChains(page).move_to_element(to_element=element).click().perform()
                 return
-            except:
-                print('click error!')
+            except Exception as e:
+                warn(['click error!',e])
 
     time.sleep(1)
 
@@ -445,17 +473,16 @@ def MyTitle(l):
 
 
 def setscrolltop(l):
-    page = l[0]
-    x = l[1]
+    (page,x)=l
     page.execute_script(f'document.documentElement.scrollTop={x}')
 
 
-def pagedownload(url, path, t=10, silent=True, depth=0, auto=None):
-    def end():
+def pagedownload(url, path, t=15, silent=True, depth=0, auto=None):
+    # 如果下载失败，再下载一次
+    def recursive():
         time.sleep(t)
         page.quit()
         time.sleep(1)
-        # 如果下载失败，再下载一次
         if os.path.exists(path + '.crdownload'):
             os.remove(path + '.crdownload')
             warn(f'{t}s后下载失败。没有缓存文件存留（自动删除） 请手动尝试 {url}')
@@ -463,9 +490,15 @@ def pagedownload(url, path, t=10, silent=True, depth=0, auto=None):
             return pagedownload(url, path, t=t + t, depth=depth + 1)
         return True
 
-    if depth > 4:
+    # 递归停止条件
+    # region
+    if depth > 5:
         warn('最终下载失败。没有缓存文件存留（自动删除） 请手动尝试 {url}')
         return False
+    # endregion
+
+    # 获取变量
+    # region
     path = standarlizedPath(path)
     if path.find('.') < 0:
         path += '/'
@@ -478,16 +511,42 @@ def pagedownload(url, path, t=10, silent=True, depth=0, auto=None):
     if silent == True:
         options.headless = True
     page = webdriver.Chrome(chrome_options=options)
+    # endregion
+
+    # 打开页面
     try:
         page.get(url)
+        # 如果服务器直接403
+        # region
+        if tellstringsame(page.title,'403 forbidden'):
+            warn(f'这个url已经被服务器关闭  403  ：{url}')
+            return False
+        # endregion
+
     except Exception as e:
-        warn(url)
-        warn(e)
-        sys.exit(0)
+    # 仍然可以强制下载的报错
+        if type(e)in [ZeroDivisionError,]:
+            warn(e)
+        elif  type(e)in [selenium.common.exceptions.WebDriverException]:
+        # 需要重启pagedownload的下载报错
+            warn(e)
+            page.quit()
+            return pagedownload(url,path,t,silent,depth+1)
+        else:
+            warn(e)
+            warn(type(e))
+            sys.exit(-1)
+
+
     time.sleep(2)
     i = 0
+    # 如果这个链接打开就能自动下载
+    # region
     if not auto == None:
-        return end()
+        return recursive()
+    # endregion
+
+    # region
     while i < 10:
         # 什么？？？竟然要尝试10次，哈哈哈真是笑死我了
         try:
@@ -498,17 +557,30 @@ def pagedownload(url, path, t=10, silent=True, depth=0, auto=None):
             a1.click();")
             break
         except:
+            warn('下载重试中...')
             i += 1
-    return end()
+    # endregion
 
+    return recursive()
+
+def scrshot(l):
+    (element,path)=l
+    path=standarlizedPath(path)
+    path=path.strip('.png')+'.png'
+    file('wb',path,element.screenshot_as_png)
 
 # endregion
 
 # 文件读写
 # region
 def parentpath(s=None):
-    # 查找文件所在位置
+    # 查找文件所在位置，直接返回文件夹的内部路径
+    b=False
+    if s[-1]in['\\','/']:
+        b=True
     s = standarlizedPath(s)
+    if b:
+        s+='/'
     return s[:s.rfind('/') + 1]
 
 
@@ -523,7 +595,7 @@ def findroot():
     return s
 
 
-def deletedir(l, silent=None):
+def deletedirandfile(l, silent=None):
     # 递归删除dir_path目标文件夹下所有文件，以及各级子文件夹下文件，保留各级空文件夹
     # (支持文件，文件夹不存在不报错)
     def del_files(dir_path):
@@ -552,6 +624,11 @@ def deletedir(l, silent=None):
 
 def standarlizedPath(s=''):
     # 统一路径格式
+    try:
+        s=os.path.abspath(s)
+    except Exception as e:
+        warn(e)
+        sys.exit(-1)
     if s == '':
         s = __file__
     return s.replace('\\', '/')
@@ -579,14 +656,11 @@ def CreatePath(path):
     path = parentpath(path)
     if not path.rfind('.') > 1:
         path = path + '/'
-    while path.rfind('//') > 0:
-        path = re.sub('//', '/', path)
-    if path.rfind('/') > 0:
-        path = path[0:path.rfind('/')]
     if not os.path.exists(path):
         try:
             os.makedirs(path)
-        except:
+        except Exception as e:
+            warn(e)
             warn(f'Create {path} Failed.')
         return True
 
@@ -599,7 +673,7 @@ def createfile(path, encoding=None):
     # 文件已存在返回False，成功返回True
     path = standarlizedPath(path)
     root = parentpath(path)
-    createpath(root)
+    createpath(path)
     name = filename(path[path.rfind('/') + 1:])
     if not path == root + name:
         tip(f'文件名{path}不规范，已重命名为{root + name}')
@@ -609,10 +683,10 @@ def createfile(path, encoding=None):
         return False
     # try:
     if not encoding==None:
-        with open(path, 'wb') as f:
+        with open(path, 'w') as f:
             ()
     else:
-        with open(path, 'w', encoding=encoding) as f:
+        with open(path, 'wb', encoding=encoding) as f:
             ()
     # except Exception:
     #     warn(f'创建文件{path}未知失败。{str(Exception)}')
@@ -622,46 +696,53 @@ def createfile(path, encoding=None):
 
 def file(mode, path, IOList=None, encoding=None):
     # 所有文件with open的封装
-    path = standarlizedPath(path)
-    createpath(path)
-    if (IOList==None or IOList==[]) and (mode.find('w') > -1 or mode.find('a')>-1):
-        warn(f'可能是运行时错误。写未传参。IOList: {info(IOList)} mode: {mode}')
-        sys.exit(0)
-    if not os.path.exists(path) and mode.find('r') > -1:
-        warn(f'错误。读不存在文件：{path}')
-        return False
-    # 比特流
-    if mode == 'rb':
-        with open(path, mode='rb') as file:
+    try:
+        path = standarlizedPath(path)
+        createpath(path)
+        if (IOList==None or IOList==[]) and (mode.find('w') > -1 or mode.find('a')>-1):
+            warn(f'可能是运行时错误。写未传参。IOList: {info(IOList)} mode: {mode}')
+            sys.exit(-1)
+        if not os.path.exists(path) and mode.find('r') > -1:
+            warn(f'错误。读不存在文件：{path}')
+            return False
+        # 比特流
+        if mode == 'rb':
+            with open(path, mode='rb') as file:
+                    return extend(IOList,file.readlines())
+        # 字符流
+        elif mode == 'r':
+            with open(path, mode='r', encoding=encoding) as file:
                 return extend(IOList,file.readlines())
-    # 字符流
-    elif mode == 'r':
-        with open(path, mode='r', encoding=encoding) as file:
-            return extend(IOList,file.readlines())
-    elif mode == 'w':
-        with open(path, mode='w', encoding=encoding) as file:
-            file.writelines(IOList)
-    elif mode == 'wb':
-        try:
-            with open(path, mode='wb') as file:
-                file.write(IOList)
-        except:
-            with open(path, mode='wb') as file:
+        elif mode == 'w':
+            with open(path, mode='w', encoding=encoding) as file:
                 file.writelines(IOList)
-    elif mode=='a':
-        with open(path, mode='a', encoding=encoding) as file:
-            file.writelines(IOList)
-
+        elif mode == 'wb':
+            try:
+                with open(path, mode='wb') as file:
+                    file.write(IOList)
+            except:
+                with open(path, mode='wb') as file:
+                    file.writelines(IOList)
+        elif mode=='a':
+            with open(path, mode='a', encoding=encoding) as file:
+                file.writelines(IOList)
+    except Exception as e:
+        warn(e)
+        warn(info(IOList))
+        sys.exit(-1)
 
 def DesktopPath(s=''):
     return 'C:/Users/17371/Desktop/' + s
 
+def desktoppath(s=''):
+    return DesktopPath(s)
 
 class txt():
     def __init__(self, path, encoding='utf-8'):
         if encoding == None:
             encoding = 'utf-8'
         self.encoding = encoding
+        self.path=os.path.abspath(path)
         self.path = path.strip('.txt') + '.txt'
         self.l = []
         if not os.path.exists(self.path):
@@ -678,9 +759,10 @@ class txt():
         for s in l:
             newl.append(str(s)+'\n')
             self.l.append(str(s))
-        file('a',self.path,newl)
+        file('a',self.path,newl,encoding='utf-8')
 
     def save(self):
+        # 强制写
         slist = []
         for i in self.l:
             slist.append(i + '\n')
@@ -691,9 +773,6 @@ class txt():
     def length(self):
         return len(self.l)
 
-    def __del__(self):
-        self.save()
-
 class RefreshTXT(txt):
     # 实现逐行的记录仓库
     # 实现备份
@@ -701,20 +780,16 @@ class RefreshTXT(txt):
     def __init__(self, path, encoding=None):
         txt.__init__(self, path,encoding)
         self.loopcount=0
-        self.rollback()
-        #         去重，去空，集合化
-        # region
-        p = list(set(self.l))
-        p.sort(key=self.l.index)
-        self.l = p
-        if '' in self.l:
-            self.l.pop(self.l.index(''))
-        # endregion
+        # self.rollback()
+        self.set()
+        self.backup()
+
+    def backup(self):
         # 备份
         # region
         backupname = self.path.strip('.txt') + '_backup.txt'
         if not os.path.exists(backupname):
-            f = txt(backupname, encoding)
+            f = txt(backupname, self.encoding)
             extend(f.l, extend([now()], self.l))
             f.save()
         else:
@@ -724,14 +799,28 @@ class RefreshTXT(txt):
                 f.save()
         # endregion
 
+
+    def set(self):
+        #         去重，去空，集合化
+        # region
+        p = list(set(self.l))
+        p.sort(key=self.l.index)
+        self.l = p
+        if '' in self.l:
+            self.l.pop(self.l.index(''))
+
+
     def rollback(self):
-        if len(self.l) <= 1:
+        if len(self.l) < 1:
             return None
         self.l=extend(self.l[1:],[self.l[0]])
         self.loopcount-=1
+        self.save()
+        warn('rollbacked.')
         return self.l[-1]
 
     def get(self):
+        txt.__init__(self,self.path,self.encoding)
         if len(self.l) <= 1:
             return None
         self.l=extend([self.l[-1]],self.l[:-1])
@@ -752,8 +841,9 @@ class RefreshTXT(txt):
         if type(l) == list:
             for i in l:
                 if not i in self.l:
-                    self.l.append(i)
-            self.save()
+                    l.append(i)
+                    txt.add(self,i)
+            txt.__init__(self,self.path,self.encoding)
         else:
             RefreshTXT.add(self,[l])
 
@@ -769,24 +859,32 @@ def filetodicts(path):
 class Json(txt):
     def __init__(self, path, encoding=None):
         txt.__init__(self,path,encoding)
+        self.addtodict()
+
+    def addtodict(self):
         self.d = {}
         for i in self.l:
-            self.d.update(stringtodict(i))
+            try:
+                self.d.update(jsontodict(i))
+            except:
+                warn(i)
+                sys.exit(-1)
+
 
     def add(self, d):
-        txt.add(self, dicttostring(d))
-        self.d.update(stringtodict(d))
+        txt.add(self, dicttojson(d))
+        self.d.update(jsontodict(d))
 
 class RefreshJson(Json,RefreshTXT):
     def __init__(self,path):
-        Json.__init__(self,path)
         RefreshTXT.__init__(self,path)
+        Json.addtodict(self)
 
     def get(self):
-        return stringtodict(RefreshTXT.get(self))
+        return jsontodict(RefreshTXT.get(self))
 
     def rollback(self):
-        return stringtodict(RefreshTXT.rollback(self))
+        return jsontodict(RefreshTXT.rollback(self))
 
     def add(self,l):
         if not type(l)==list:
@@ -794,9 +892,17 @@ class RefreshJson(Json,RefreshTXT):
             return
         else:
             for i in l:
-                self.d.update(stringtodict(i))
-                RefreshTXT.add(self,dicttostring(i))
+                self.d.update(jsontodict(i))
+                RefreshTXT.add(self, dicttojson(i))
 
+    def delete(self,l):
+        if not type(l)==list:
+            RefreshJson.delete(self,[l])
+        else:
+            for i in l:
+                RefreshTXT.delete((self, dicttojson(i),))
+                self.d.pop(jsontodict(i).keys())
+            self.save()
 class cache():
     def __init__(self,path):
         self.path=path
@@ -807,19 +913,23 @@ class cache():
                 f=txt(self.path)
                 if f.l==[]:
                     return None
-                s=stringtodict(f.l[0])
+                s=jsontodict(f.l[0])
                 f.l.pop(0)
                 f.save()
                 return s
-            except:
+            except Exception as e:
+                warn(e)
                 warn('cache获取失败。正在重试')
                 time.sleep(2)
 
     def add(self,s):
-        s=dicttostring(s)
+        s=dicttojson(s)
         f=txt(self.path)
         f.add(s)
         f.save()
+
+    def length(self):
+        return txt(self.path).length()
 
 
 # endregion
@@ -830,7 +940,13 @@ Logcount = 0
 
 def Log(s, x1, x2, x3=7, x4=35):
     s = str(s)
-    pp = inspect.getframeinfo(inspect.currentframe().f_back.f_back)[0]
+    try:
+
+        pp2= inspect.getframeinfo(inspect.currentframe().f_back.f_back)[1]
+        pp1 = inspect.getframeinfo(inspect.currentframe().f_back.f_back)[2]
+        pp = inspect.getframeinfo(inspect.currentframe().f_back.f_back)[0]
+    except:
+        pp1=None
     s2 = f'\033[{x3};{x4}m'
     for i in range(len(pp) // 4 - 7):
         s2 += '\t'
@@ -840,7 +956,7 @@ def Log(s, x1, x2, x3=7, x4=35):
     s2 += '\033[0m'
     global Logcount
     print(
-        f'[{Logcount}] \033[7;29m  {str(gettime(now()).hour).zfill(2)}:{str(gettime(now()).minute).zfill(2)}:{str(gettime(now()).second).zfill(2)} \033[{x1};{x2}m {pp} <{inspect.getframeinfo(inspect.currentframe().f_back.f_back)[2]}> \033[0m' + s2)
+        f'[{Logcount}] \033[7;29m  {str(gettime(now()).hour).zfill(2)}:{str(gettime(now()).minute).zfill(2)}:{str(gettime(now()).second).zfill(2)} \033[{x1};{x2}m {pp1} - {pp}  <{pp2}> \033[0m' + s2)
     Logcount += 1
 
 
@@ -853,6 +969,10 @@ def tip(s):
 
 
 def delog(s=0):
+    if type(s)==list:
+        for i in s:
+            delog(i)
+        return
     if not debug:
         return
     if s == 0:
@@ -891,16 +1011,25 @@ def extend(l1, l2):
         l1.append(i)
     return l1
 
-def stringtodict(s):
+def jsontodict(s):
+    if type(s)==dict:
+        return s
+    if s==''or s==None:
+        return
     try:
         return json.loads(s)
-    except:
-        return s
+    except Exception as e1:
+        warn([s,e1])
+        sys.exit(-1)
 
-def dicttostring(s):
+def dicttojson(s):
+    if type(s)==str:
+        return s
     try:
         return json.dumps(s,ensure_ascii=False)
-    except:
+        # return str(s)
+    except Exception as e:
+        warn(e)
         return ''
 
 # endregion
@@ -912,19 +1041,42 @@ def strre(s, pattern):
 
 # endregion
 
+# 分布式
 # region
+def initdisk(diskname):
+#     初始化一个分布式盘
+    f=Json('./diskInfo.txt')
+    l=RefreshTXT("D:/Kaleidoscope/disknames.txt")
+    if not f.l==[]:
+        warn(f'初始化分布盘失败。当前盘{os.path.abspath("./")}已存在diskInfo.txt。请检查。')
+        return False
+    if diskname in l.l:
+        warn(f'该名字已存在。请更换。')
+        return False
+    f.add({"name":str(diskname)})
+    l.add(diskname)
+    return
 
+def getdiskname():
+    if not os.path.exists('./diskInfo.txt'):
+        name=input(f'检测到当前操作盘未初始化。请输入盘符（后期沿用，慎重！）：\n\t\t\t\t（已启用的唯一名）{RefreshTXT("D:/Kaleidoscope/disknames.txt").l}')
+        initdisk(name)
+    return RefreshJson('./diskInfo.txt').d['name']
+
+def setRootPath():
+#     获取操作盘号，并更新到记录中
+    for i in txt('D:/Kaleidoscope/ActiveDisc.txt').l:
+        if info(i) >= 0.2:
+            os.chdir(i + ':/')
+            log(f'operating DISK {str.title(i)}')
+            break
 # endregion
 # region
 
 # endregion
 # __init__()
 # region
-for i in txt('D:/Kaleidoscope/ActivDisc.txt').l:
-    if info(i) >= 0.5:
-        os.chdir(i + ':/')
-        log(f'operating DISK {str.title(i)}')
-        break
-hashdisk = RefreshJson('./diskInfo.txt').d['hashdisk']
+setRootPath()
+diskname = getdiskname()
 tip('MyUtils already loaded')
 # endregion

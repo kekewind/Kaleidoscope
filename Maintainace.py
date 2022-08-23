@@ -6,8 +6,8 @@ import MyUtils
 from selenium.webdriver.common.by import By
 
 
+# 抖音，去掉- 抖音结尾的mp4，并且重命名
 def douyin1():
-    # 抖音，去掉- 抖音结尾的mp4，并且重命名
     l=[]
     for(root,dirs,files)in os.walk('../抖音/'):
         # 遍历每个文件夹
@@ -24,8 +24,9 @@ def douyin1():
                             os.rename(path,path.strip(' - 抖音.mp4')+'.mp4')
             print(f'{dir} checked.')
     # 删除多余的那个
-    MyUtils.deletedir(l)
+    MyUtils.deletedirandfile(l)
 
+# 对为下载完成文件
 def douyin2():
     newfile=MyUtils.RefreshTXT('../抖音/Failed.txt')
     page=MyUtils.edge()
@@ -46,12 +47,12 @@ def douyin2():
                         # 准备删除原文件，并记录到Fail
                         l.append(os.path.abspath(f'{root}/{file}'))
                         newfile.add(f'{dir}{file}')
-    MyUtils.deletedir(l)
+    MyUtils.deletedirandfile(l)
     if not len(l):
         os.remove('../抖音/VideoSpectrum.txt')
 
+# 把like里面的标题全部check，搜索，搜索到第一个符合文案的结果，获取用户ID，转移文件到文件夹中
 def douyin3():
-    # 把like里面的标题全部check，搜索，搜索到第一个符合文案的结果，获取用户ID，转移文件到文件夹中
     page=MyUtils.edge('https://www.douyin.com')
     for (root,dirs,files)in os.walk('../抖音/like'):
         for file in files:
@@ -67,57 +68,6 @@ def douyin3():
             UserUID=UserUID[UserUID.find('user/'):UserUID.find('?')]
             time.sleep(1)
 
-def douyin4():
-#     遍历VideoNum,获取Title,检查是否有,如果没有，移动到Exception
-    lis=[]
-    sum=0
-    maxworkers=5
-    isFull=[0 for i in range(maxworkers)]
-    for (root, dirs, files) in os.walk('../抖音'):
-        for dir in dirs:
-            for (root1, dirs1, files1) in os.walk(root + '/' + dir):
-                for file in files1:
-                    lis.append(file)
-                # print(dir,len(files1))
-                # sum+=len(files1)
-    file=MyUtils.RefreshTXT('../抖音/VideoSpectrum.txt')
-    exc=MyUtils.RefreshTXT('../抖音/ExceptionVideo.txt')
-    ready=MyUtils.RefreshTXT('../抖音/AlreadyDownloaded.txt')
-    pagelis=[MyUtils.edge() for i in range(maxworkers)]
-    e=MyUtils.MyThreadPool(maxworkers)
-    while file.loopcount<file.length():
-        def detect():
-            nonlocal file,pagelis,lis
-
-            # 判断跳过
-            VideoNum=file.get()
-            print(f'detecting {VideoNum}')
-            if VideoNum in ready.l or VideoNum in exc.l:
-                return
-
-            # 获取网页器
-            for i in range(maxworkers):
-                if isFull[i]==0:
-                    break
-            page=pagelis[i]
-            isFull[i]=1
-            page.get(f'https://www.douyin.com/video/{VideoNum}')
-
-            # 获取标题
-            title = MyUtils.MyTitle([page])
-            title = title.strip(' - 抖音')+'.mp4'
-            if not title in lis:
-                exc.add(VideoNum)
-                print('Exception detected.you may try',f'https://www.douyin.com/video/{VideoNum}')
-            else:
-                ready.add(VideoNum)
-                print(f'written down{VideoNum}')
-            isFull[i]=0
-
-        # 主程序满冷却
-        while isFull==[1 for i in range(maxworkers)]:
-            time.sleep(3)
-        e.excute(detect)
 
 def douyin5():
 #     维护Failed.txt，删除已经不必要存在的.crdownload
@@ -135,7 +85,7 @@ def douyin5():
                         f.add(file)
                         print(f'准备删除.crdownload文件{file}')
 
-    MyUtils.deletedir(deletelis)
+    MyUtils.deletedirandfile(deletelis)
 
     while f.loopcount<f.length():
         a=f.get()
@@ -158,12 +108,12 @@ def Space(silent=True):
         if dir.find('scoped_dir')>=0:
             dlis.append('C:\\Users\\17371\\AppData\\Local\\Temp\\'+dir)
             if len(dlis)>500:
-                MyUtils.deletedir(dlis, silent=True)
+                MyUtils.deletedirandfile(dlis, silent=True)
                 dlis=[]
-    MyUtils.deletedir(dlis, silent=True)
+    MyUtils.deletedirandfile(dlis, silent=True)
 
+#     author错位
 def douyin7():
-#     检查是否有错位
     l=[]
     d={}
     sum=0
@@ -196,7 +146,7 @@ def douyin8():
                 t=os.path.getctime(os.path.abspath(f'../抖音/{dir}/{file}'))
                 if t>999999999999999999999:
                     l.append(os.path.abspath(f'../抖音/{dir}/{file}'))
-    MyUtils.deletedir(l)
+    MyUtils.deletedirandfile(l)
 
 # douyin2()
 # douyin1()
@@ -206,6 +156,6 @@ def douyin8():
 # douyin6()
 # douyin7()
 # douyin8()
-Space()
+# Space()
 
 # douyin6()

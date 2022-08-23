@@ -45,11 +45,11 @@ def GetM3U8andInfo():
     if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
         return
     # 点击当前EP按钮，多点几次
-    MyUtils.MyClick([page, By.XPATH, f'/html/body/div[2]/div[1]/div[2]/div/div/div[2]/ul/li[{CurrentEP}]'])
+    MyUtils.click([page, By.XPATH, f'/html/body/div[2]/div[1]/div[2]/div/div/div[2]/ul/li[{CurrentEP}]'])
 
 
     if MyUtils.Element([page, By.XPATH, '/html/body/div/div/div/img'], depth=9):
-        MyUtils.MyClick([page, By.XPATH, '/html/body/div/div/div/img'])
+        MyUtils.click([page, By.XPATH, '/html/body/div/div/div/img'])
     # 再检查一次m3u8，如果此时手动下载了，直接退出
     time.sleep(5)
     if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
@@ -73,7 +73,7 @@ def GetM3U8andInfo():
     if not PossibleElement == None:
         PossibleElement.click()
     time.sleep(1)
-    MyUtils.MyClick([page, By.XPATH, '/html/body/div/button[1]'])
+    MyUtils.click([page, By.XPATH, '/html/body/div/button[1]'])
     time.sleep(5)
     time.sleep(3)
     if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
