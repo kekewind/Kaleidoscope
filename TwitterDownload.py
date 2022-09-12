@@ -14,7 +14,7 @@ TwitterSum = 0
 TotalExceptionNum = 0
 headers = MyUtils.headers
 
-LocalUserSpectrum = MyUtils.file('r', './twitter/UserSpectrum.txt')
+LocalUserSpectrum = MyUtils.file('r', './twitter/AllUsers.txt')
 LocalContentSpectrum = MyUtils.file('r', './twitter/ContentSpectrum.txt')
 LocalPictureSpectrum = MyUtils.file('r', './twitter/PictureSpectrum.txt')
 

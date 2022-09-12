@@ -4,7 +4,7 @@ import MyUtils
 import requests
 from selenium.webdriver.common.by import By
 
-for HostUrl in MyUtils.file('r', './zhihu/UserSpectrum.txt'):
+for HostUrl in MyUtils.file('r', './zhihu/AllUsers.txt'):
     page=MyUtils.chrome()
     page.get(HostUrl)
     MyUtils.skip([page, By.XPATH, '/html/body/div[4]/div/div/div/div[2]/button'])

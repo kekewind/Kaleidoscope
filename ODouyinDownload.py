@@ -24,7 +24,7 @@ def download():
     # MyUtils.delog('a')
     global DouyinSum
     while len(ReadyToDownload):
-        stole = MyUtils.gettime()
+        stole = MyUtils.strtotime()
         # 获取参数
         # region
         (VideoNum, (HostID, title, VideoUrl)) = ReadyToDownload.popitem()
@@ -62,12 +62,12 @@ def download():
             MyUtils.warn(f'下载失败，{VideoNum}记录补全到 Failed.\n{DouyinSum}]{HostID}  :作品编号：{VideoNum}     作品标题：{title}\n{VideoUrl}')
             # endregion
 
-        MyUtils.log(f'cost{MyUtils.gettime() - stole}')
+        MyUtils.log(f'cost{MyUtils.strtotime() - stole}')
 
 # 探测
 def detect(path, author, VideoNum, l):
     MyUtils.delog('a')
-    stole = MyUtils.gettime()
+    stole = MyUtils.strtotime()
     # 获取参数
     # region
     index = isPageUsing.index(0)
@@ -143,9 +143,9 @@ if __name__=='__main__':
 
     # 初始化参数
     # region
-    Maintainace.Space()
-    Failed = MyUtils.RefreshTXT('/抖音/Failed.txt')
-    LocalUserSpectrum = MyUtils.RefreshTXT('/抖音/UserSpectrum.txt')
+    Maintainace.SeleniumSpace()
+    Failed = MyUtils.RefreshTXT('抖音/FailedPieces.txt')
+    LocalUserSpectrum = MyUtils.RefreshTXT('抖音/AllUsers.txt')
     # Distripute = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/VideoSpectrum.txt')
     Distripute=MyUtils.RefreshJson('抖音/AllPieces.txt')
     MyUtils.log(f'LocalVideo:{Distripute.length()} LocalUser:{LocalUserSpectrum.length()} Failed:{Failed.length()}')
@@ -166,7 +166,7 @@ if __name__=='__main__':
         pool1=multiprocessing.Pool(maxworkers)
         # pool2=multiprocessing.Pool(maxworkers1)
         UserUID = LocalUserSpectrum.get()
-        # UserUID='MS4wLjABAAAAiFr5ORhuw0jQALgakjhQ-QKuYK6LEuifcdwLGxHORzA'
+        # useruid='MS4wLjABAAAAiFr5ORhuw0jQALgakjhQ-QKuYK6LEuifcdwLGxHORzA'
         # endregion
 
         # 清除UserUID的https://www.douyin.com/user/前缀
@@ -187,7 +187,7 @@ if __name__=='__main__':
         # endregion
         # 验证码跳过
         # region
-        MyUtils.skip([DouyinHost, By.ID, "captcha-verify-image"])
+        MyUtils.skip([DouyinHost, By.ID, "captcha-verify-image"],True)
         # MyUtils.MySkip([DouyinHost, By.ID, "login-pannel"])
         # endregion
         # 获取变量
@@ -220,7 +220,7 @@ if __name__=='__main__':
         for VideoElement in ttt:
             # 获取变量
             # region
-            (elementurl, VideoNum) = DouyinUtils.HostElement([VideoElement])
+            (elementurl, VideoNum) = DouyinUtils.piecetourlnum([VideoElement])
             i = 0
             # endregion
             # 跳过已下载

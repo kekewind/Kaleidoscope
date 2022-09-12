@@ -7,19 +7,17 @@ import multiprocessing
 from selenium.webdriver.common.by import By
 
 import DouyinUtils
-import Maintainace
 import MyUtils
-import MDouyin
 
 def download():
     # 变量
-    Failed = MyUtils.Json('D:/Kaleidoscope/抖音/Failed.txt')
-    record=MyUtils.Json('D:/Kaleidoscope/抖音/AllPieces.txt')
-    readytoDownload=MyUtils.cache('D:/Kaleidoscope/抖音/ReadytoDownload.txt')
+    Failed =DouyinUtils.failed
+    allpieces=DouyinUtils.allpieces
+    readytoDownload=DouyinUtils.readytodownload
 
     # 下载
     while True:
-        stole = MyUtils.now()
+        stole = MyUtils.nowstr()
         # 获取参数
         # region
         rec=readytoDownload.get()
@@ -49,7 +47,7 @@ def download():
                 i += 1
                 MyUtils.delog(f'开始下载，url={url}')
                 try:
-                    t = MyUtils.pagedownload(url=url, path=f'{path}/{title}/{i}.png',t=7) and t
+                    t = MyUtils.pagedownload(url=url, path=f'{path}/{title}/{i}.png',t=0) and t
                 except Exception as e:
                     MyUtils.warn(e)
                     t = False
@@ -58,8 +56,8 @@ def download():
         # 是否下载成功
         if t:
             # region
-            record.add(DouyinUtils.simplinfo(VideoNum, author, title))
-            MyUtils.log(f'下载成功，{VideoNum}记录补全.\n{record}]{author}  :作品编号：{VideoNum}     作品标题：{title}\n{VideoUrl}')
+            allpieces.add(DouyinUtils.simplinfo(VideoNum, author, title))
+            MyUtils.log(f'下载成功，{VideoNum}记录补全.\n{allpieces}]{author}  :作品编号：{VideoNum}     作品标题：{title}\n{VideoUrl}')
             # endregion
         else:
             # region
@@ -68,10 +66,12 @@ def download():
         MyUtils.log(f'cost{MyUtils.counttime(stole)}')
         # endregion
 
+
 # 持续性唤醒
 while True:
-    time.sleep(15)
     download()
-    MyUtils.log('下载队列已空。Downloader 等待中...')
+    MyUtils.log(f'下载队列已空。Downloader 等待中...')
+    time.sleep(15)
+
 
 

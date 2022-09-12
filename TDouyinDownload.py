@@ -10,8 +10,8 @@ import Maintainace
 import MyUtils
 
 # 变量
-Failed = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/Failed.txt')
-UserList=MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/UserSpectrum.txt')
+Failed = MyUtils.RefreshTXT('/抖音/FailedPieces.txt')
+UserList=MyUtils.RefreshTXT('/抖音/AllUsers.txt')
 record=MyUtils.RefreshJson('抖音/AllPieces.txt')
 readytoDownload={}
 Host = MyUtils.edge()
@@ -38,7 +38,7 @@ while UserUID:
     # endregion
     # 获取变量
     # region
-    MyUtils.skip([Host, By.ID, "captcha-verify-image"])
+    MyUtils.skip([Host, By.ID, "captcha-verify-image"],True)
     MyUtils.skip([Host, By.ID, "login-pannel"])
     author = MyUtils.Element([Host, By.XPATH, '/html/head/title']).get_attribute('text')
     author = author[0:author.rfind('的主页')]
@@ -67,7 +67,7 @@ while UserUID:
     for VideoElement in DouyinUtils.HostPieces([Host]):
         # 获取变量
         # region
-        (elementurl, VideoNum) = DouyinUtils.HostElement([VideoElement])
+        (elementurl, VideoNum) = DouyinUtils.piecetourlnum([VideoElement])
         # endregion
         # 跳过已下载
         # region
@@ -77,10 +77,10 @@ while UserUID:
         # endregion
         def detect():
             # 探测
-            stole = MyUtils.now()
+            stole = MyUtils.nowstr()
             # 获取参数
             # region
-            flag=DouyinUtils.IsPic([Host,VideoElement])
+            flag=DouyinUtils.IsPic([VideoElement])
             # endregion
 
             # 作品网页
@@ -141,7 +141,7 @@ while UserUID:
         def download():
             # 下载
             while len(readytoDownload):
-                stole = MyUtils.now()
+                stole = MyUtils.nowstr()
                 # 获取参数
                 # region
                 (VideoNum, (author, title, VideoUrl,flag)) = readytoDownload.popitem()

@@ -1,30 +1,24 @@
 import os
 import shutil
+import sys
 import time
 
+import pyperclip
 import requests
 from selenium.webdriver.common.by import By
 
+import BUtils
+import DouyinUtils
+import Maintainace
 import MyUtils
 
-#
-# '''
-# 需要考虑的压力测试意外特殊情况：
+# 压力测试
 # 多作者、多P
-#
-# 需要实现的用户需求：
-# 能够看到一个用户（通过用户ID检索）看到她发布的全部视频，然后对某个特定视频，能看到这个视频的封面，简介，视频内容，字幕。
-#
-#
 # 组织方式约定：
-# E:/Bili/upUID/
-#        视频标题BV********.jpg(png)，/BV********/，
+# ./bili/upUID/
+#        视频标题_BV********.jpg(png)，
 #                 分P标题.MP4，简介内容.txt。字幕文件
-#
-# '''
-# # 次生Maintainace
-#
-# # 先Maintainace'
+
 
 # count=MyUtils.RefreshTXT(f'D:/Kaleidoscope/bili/CoverSpectrum.txt')
 # path='E:/bili/cover/'
@@ -59,22 +53,14 @@ import MyUtils
 #
 # # 上面是图片转移的代码,在E盘且在spectrum里的转移并重命名
 
+videospectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/bili/VideoSpectrum.txt')
+videouserspectrum=MyUtils.RefreshTXT('D:\Kaleidoscope/bili/VideoUserSpectrum.txt')
+videouserexpired=MyUtils.RefreshTXT('D:\Kaleidoscope/bili/VideoUserExpired.txt')
 
 coverspectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/bili/CoverSpectrum.txt')
-videouserspectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/bili/VideoUserSpectrum.txt')
-path = 'E:/bili/'
 
 
-def B1():
-    # 根据E中的所有后缀重建coverspectrum
-    for (root, dirs, files) in os.walk(path):
-        lis = dirs
-        break
-    for dir in lis:
-        if not dir.find('_') > 0:
-            continue
-        coverspectrum.add(dir[dir.rfind('_') + 1:])
-        coverspectrum.save()
+downloadedindisk=MyUtils.RefreshTXT('./bili/Downloaded.txt')
 
 
 def upid(UID):
@@ -92,176 +78,90 @@ def upid(UID):
         print(f"[upid] error when trying mid(UID)={UID}")
         return None
 
+# 获取bv
+def filenametonum(s):
+    if s=='':
+        MyUtils.warn()
+        sys.exit(-1)
+    return s[s.rfind('_')+1:]
 
-def B2():
-    # # 对E盘里的cover进行逐个id筛查是否要并入新的spectrum
-    MyUtils.MyDeleteEmpty('./bili/cover')
-    for (root, dirs, files) in os.walk('./bili/cover'):
-        break
-    page = MyUtils.chrome(mine=1)
-    for dir in dirs:
-        page.get(url='https://search.bilibili.com/all?from_source=webtop_search&&keyword=' + dir)
-        a = MyUtils.Element([page, By.XPATH, '/html/body/div[3]/div[1]/div[1]/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/a'], depth=7)
-        if a == None:
-            continue
-        ss = a.get_attribute('href')
-        UID = ss[ss.rfind('/') + 1:]
-        page.get(f'https://space.bilibili.com/{UID}')
-        tt = input()
-        if tt.find('e') > 0:
-            coverspectrum.add(UID)
-            coverspectrum.save()
-            if tt.find('f') > 0:
-                videouserspectrum.add(UID)
-                videouserspectrum.save()
-        else:
-            MyUtils.deletedirandfile('./bili/cover/' + dir)
-    time.sleep(9999)
-    page.close()
-    MyUtils.MyDeleteEmpty('./bili/cover')
+# 记录操作盘user、pieces
+def makerecord():
+    length1=videospectrum.length()
+    f=[]
+    for i in MyUtils.listdir('./bili'):
+        f.append(i[i.rfind('_')+1:])
+        for k in MyUtils.listdir(i):
+            j=MyUtils.filename(k)
+            num=(filenametonum(j))
+            title=j[:-len('_'+num)]
+            videospectrum.add(DouyinUtils.simplinfo(num,filenametonum(i),title))
+    MyUtils.log(['user: ',f])
+    downloadedindisk.l=f
+    downloadedindisk.save()
+    MyUtils.log(f'{length1}->{videospectrum.length()}')
 
+# 打开网页，决定是否要expire
+def checkweb():
+    page=MyUtils.edge()
+    count=0
+    for i in range(downloadedindisk.length()):
+        num=downloadedindisk.get()
+        count+=1
+        page.execute_script(f"window.open('https://space.bilibili.com/{num}?')")
+        if count>=20:
+            break
+    expire()
 
-def B3():
-    # 清洁spectrum中的重复项
-    coverspectrum.save()
-    videouserspectrum.save()
+# 立刻从Expired更新UserList
+def expire():
+    while True:
+        num=input('请输入expire编号：')
+        num=num.strip('?').strip('https://space.bilibili.com/')
+        videouserspectrum.delete(num)
+        videouserexpired.add(num)
+        MyUtils.log(f'{num} expired.')
 
+# 删除操作盘里的作者文件
+def delete():
+    lis=[]
+    for i in videouserexpired.l:
+        dirs=MyUtils.listdir('./bili')
+        for k in dirs:
+            num=k[k.rfind('_')+1:]
+            if num==i:
+                lis.append(k)
 
-def B4():
-    #     清洁以前的视频下载
-    # 先遍历获得新的标识总集。都包括视频标题
-    # 一定是E盘和G盘
-    lis1 = []
-    lis2 = []
-    dlis = []
+    print(f'操作盘中存在的作者： {lis}')
+    MyUtils.deletedirandfile(lis)
 
+# 立刻命令行添加用户
+def add():
+    c=input('请输入要添加的用户：')
+    MyUtils.log(f'{BUtils.urltouseruid(c)} added.')
 
-    def tell(s):
-        nonlocal lis1
-        for i in lis1:
-            if MyUtils.TellStringSame(s, i):
+#反向从操作盘中检查申明
+def checkisindisk():
+    def func(tuple):
+        (uid,au,ti,d1,d)=tuple
+        b=False
+        for i in MyUtils.listdir('./bili'):
+            if MyUtils.tellstringsame(i,au):
+                b=True
+                break
+        if b==False:
+            MyUtils.delog(f'不存在{d}{222}')
+            return False
+        for j in MyUtils.listdir(i):
+            if MyUtils.tellstringsame(MyUtils.filename(j), f'{ti}_{uid}'):
+                MyUtils.delog(f'存在{d}')
                 return True
+        MyUtils.delog(f'不存在{d1}{(MyUtils.listdir(i),f"{ti}_{uid}")}')
         return False
+    Maintainace.checkisindisk(videospectrum,func)
 
-    # os.chdir('E:/')
-    # for (root,dirs,files)in os.walk('./bili/download'):
-    #     break
-    # for dir in dirs:
-    #     for(a,b,c)in os.walk(f'./bili/download/{dir}'):
-    #         break
-    #     for bb in b:
-    #         for(aa,bbb,cc)in os.walk(a+'/'+bb):
-    #             for ccc in cc:
-    #                 pp=ccc.strip('.mp4')
-    #                 pp=pp[:pp.rfind('-pn')]
-    #
-    #                 print(ccc)
-    #                 if tell(pp):
-    #                     dlis.append(os.path.abspath(aa+'/'+ccc))
-    # fdlis=MyUtils.RefreshTXT(MyUtils.DesktopPath('dlis.txt'))
-    # fdlis.l=dlis
-    # fdlis.save()
-
-    # 先删除文件，再删除空文件夹。
-    os.chdir('E:/')
-    dlis=MyUtils.RefreshTXT(MyUtils.DesktopPath('dlis.txt')).l
-    MyUtils.deletedirandfile(dlis)
-    MyUtils.MyDeleteEmpty('E:/bili/download')
-
-
-def B5():
-    #     每隔一段时间下载扩充视频库完毕后，遍历仓库
-    #     获取更新后的BV号记录、视频标题
-    # 这应该是更新BV记录的唯一办法。
-    VideoSpectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/bili/VideoSpectrum.txt')
-    title=MyUtils.RefreshTXT('D:/Kaleidoscope/bili/Title.txt')
-
-    lis0=[]
-    lis1=[]
-    for (root, dirs, files) in os.walk('./bili/'):
-        break
-    for dir in dirs:
-        for (a, b, c) in os.walk(f'./bili/{dir}'):
-            break
-        for cc in b:
-            for(x,y,z)in os.walk(a+'/'+cc):
-                break
-            name=cc
-            bvid = name[name.rfind('_') + 1:]
-            if not bvid in lis0 and not bvid in VideoSpectrum.set:
-                lis0.append(bvid)
-            print(f'[B5] {name} bvid checked.  {VideoSpectrum.length()}')
-
-            for name in z:
-                if name.find('.mp4')<0:
-                    continue
-                if not name in lis1 and not name in title.set:
-                    lis1.append(name)
-                print(f'[B5] {name} checked.  {title.length()}')
-    for i in lis1:
-        title.add(i)
-    title.save()
-    print(f'[B5] 标题记录行为 End。记录{title.length()}条。新增了{len(lis1)}条')
-    for i in lis0:
-        VideoSpectrum.add(i)
-    VideoSpectrum.save()
-    print(f'[B5] BV记录行为 End. 记录{VideoSpectrum.length()}条。新增了{len(lis0)}条')
-
-
-def B6():
-    #     对于视频合集，下载器因为是一次性同时解析然后自动下载的，会导致下载时folder视频名字一样。但好在BV名字不一样。
-    # 这个函数做的就是找到那些同名upid下的同名视频标题文件夹，查询api，更改视频标题。
-    lis = []
-    for (root, dirs, files) in os.walk('./bili'):
-        for dir in dirs:
-            title = []
-            for (a, b, c) in os.walk(f'./bili/{dir}'):
-                for folder in c:
-                    biaoti = folder[:folder.rfind('_')]
-                    if not biaoti in title:
-                        title.append(biaoti)
-                    else:
-                        lis.append(os.path.abspath(f'./bili/{dir}/{folder}'))
-                break
-        break
-    print(lis)  # 先检查一下lis对不对
-
-
-def B7():
-    #     通过api，获取所有用户的视频总数，并统计文件夹数目。Print
-    sum1 = 0
-    sum2 = 0
-    UserSpectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/bili/VideoUserSpectrum.txt')
-
-    for UserUID in UserSpectrum.l:
-        author = []
-        url = (f'https://api.bilibili.com/x/space/arc/search?mid={UserUID}&ps=30&tid=0&pn={1}&keyword=&order=pubdate&jsonp=jsonp')
-        res = requests.get(url, headers=MyUtils.headers)
-        num = (res.json()['data']['page']['count'])
-
-        #         要通过UID获取ID，决定通过api获得author列表，取众数
-        for name in res.json()['data']['list']['author']:
-            author.append(name)
-        for i in author:
-            if author.count(i) >= 0.7 * len(author):
-                break
-        name = i
-
-        for (root, dirs, files) in os.walk('./bili'):
-            break
-        for dir in dirs:
-            if MyUtils.TellStringSame(dir, name + '_' + UserUID):
-                break
-        for (root, dirs, files) in os.walk(f'./bili/{dir}'):
-            break
-        print(f'[MBili B7]{len(dirs)}/{num}')
-        sum1 += len(dirs)
-        sum2 += num
-    print(f'{sum1}/{sum2}')
-
-
-# B1()
-# B2()
-# B3()
-# B4()
-B5()
+# add()
+# checkweb()
+# delete()
+checkisindisk()
+# makerecord()

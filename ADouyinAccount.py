@@ -1,118 +1,123 @@
-import re
+import asyncio
+import os.path
 import sys
 import time
+import multiprocessing
 
-import pyautogui
-import pyperclip
-import requests
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import WebDriverWait
 
+import DouyinUtils
+import Maintainace
 import MyUtils
+from retrying import retry
 
-# 初始化
-LocalUserSpectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/UserSpectrum.txt')
-LocalVideoSpectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/抖音/VideoSpectrum.txt')
-MyUtils.log('Account Like processing. LocalVideo: ', (LocalVideoSpectrum.length()), ' LocalUser: ', (LocalUserSpectrum.length()))
-# 定义字典
-likecount={}
+@retry(retry_on_exception=MyUtils.retry)
+def main():
+    # 初`始`化``
+    users = DouyinUtils.allusers
+    allpieces = DouyinUtils.allpieces
+    readytodownload=DouyinUtils.readytodownload
 
-try:
-    # 登录
-    page = MyUtils.edge('https://www.douyin.com/user/MS4wLjABAAAAPw9P0loZpA5wjaWiHzxQb4B9E2Jgt4ZPWfiycyO_E4Q')
-    time.sleep(3)
-    MyUtils.skip([page, By.ID, "captcha-verify-image"])
-    MyUtils.skip([page, By.ID, "login-pannel"])
-    time.sleep(3)
+    # 变量
+    likecount={}
+    ispic=[]
+    page=MyUtils.chrome(mine=True)
 
-    # 转到喜欢页面
-    # page.get(MyUtils.MyElement([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/user/")]']).get_attribute('href'))
-    # time.sleep(1)
-    LikeElement=MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[4]/div[1]/div[1]/div[2]/span'])
-    LikeNum=LikeElement.text
-    LikeElement.click()
+    while True:
+        # 登录
+        # region
+        page.get('https://www.douyin.com/user/MS4wLjABAAAAPw9P0loZpA5wjaWiHzxQb4B9E2Jgt4ZPWfiycyO_E4Q')
+        # MyUtils.skip([page, By.ID, "captcha-verify-image"])
+        # MyUtils.skip([page, By.ID, "login-pannel"])
+        # endregion
 
-    # 下滚，保存列表
-    time.sleep(2)
-    MyUtils.scroll([page])
-    WebUserSpectrum = []
-    VideoList=[]
-    for VideoElement in MyUtils.Elements([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]']):
-        VideoUrl = VideoElement.get_attribute('href')
-        VideoNum = VideoUrl[29:len(VideoUrl)]
-        VideoList.append(VideoNum)
+        # 转到喜欢页面
+        # page.get(MyUtils.MyElement([page, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/user/")]']).get_attribute('href'))
+        # time.sleep(1)
+        DouyinUtils.HostPiecesLike([page])
 
-    # 逐一打开
-    for VideoNum in VideoList:
-        # 转到Video页面，没下过的第一遍进WebUserSpectrum
-        page.get(f'https://www.douyin.com/video/{VideoNum}')
-        time.sleep(2)
+        # 下滚，保存url列表
+        # MyUtils.scroll([page])
+        urllist=[]
+        stole=MyUtils.nowstr()
+        for VideoElement in DouyinUtils.HostPieces([page]):
+            VideoUrl,VideoNum = DouyinUtils.piecetourlnum([VideoElement])
+            urllist.append(VideoUrl)
+            ispic.append(DouyinUtils.IsPic([VideoElement]))
+        MyUtils.delog(MyUtils.counttime(stole))
 
+        # 逐一打开
+        for url in urllist:
+            stole=MyUtils.nowstr()
+            # 转到Video页面，没下过的第一遍进WebUserSpectrum
+            page.get(url)
 
-        # 跳过验证
-        MyUtils.skip([page, By.ID, "captcha-verify-image"])
+            # 跳过验证
+            MyUtils.skip([page, By.ID, "captcha-verify-image"],strict=True)
 
-        # 跳过直播
-        UserUrl=MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[1]/div[1]/a']).get_attribute('href')
-        if UserUrl.rfind('live')>0:
-            continue
+            # 变量
+            pic=ispic.pop(0)
+            VideoNum=MyUtils.tail(url,'/')
 
-        # 获取UserUID
-        UserUID=UserUrl[UserUrl.rfind('/')+1:]
-        # LocalUserSpectrum.add(UserUID)
+            # 跳过下载过的
+            # if DouyinUtils.skiprecorded(VideoNum):
+            #     continue
+            title=DouyinUtils.Title([page])
+            s = MyUtils.Element([page, By.XPATH, '/html/head/meta[3]']).get_attribute('content')
+            userid = s[s.rfind(' - ') + 3:s.rfind('发布在抖音，已经收获了') - 9]
+            if DouyinUtils.skipdownloaded(pic, allpieces, VideoNum, title, userid):
+                # 取消喜欢
+                DouyinUtils.dislike([page])
+                MyUtils.delog('已取消喜欢')
+                continue
+            path = '../抖音/' + userid
 
-        # 取消喜欢
-        MyUtils.click([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[1]'])
-        time.sleep(2)
+            # 添加下载
+            DouyinUtils.load(pic, page, VideoNum, userid, title, DouyinUtils.readytodownload)
 
-        # # 跳过UserUID已经记录的
-        # if (UserUID in LocalUserSpectrum.l):
-        #     continue
+            # 跳过直播
+            try:
+                l1=MyUtils.Elements([page, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[1]/div[1]/a'],depth=9,silent=True)
+                l2=MyUtils.Elements([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/main/div[2]/div[1]/div[1]/a'],depth=9,silent=True)
+                userurl=MyUtils.extend(l1, l2)[0].get_attribute('href')
+            except Exception as e:
+                MyUtils.delog([l1,l2])
+                MyUtils.warn(e)
+                time.sleep(999)
+            if userurl.rfind('live')>0:
+                continue
 
-        # 跳过下载过的
-        if (VideoNum in LocalVideoSpectrum.l):
-            print(f'[Main] 已下载，在记录中.{VideoNum}')
-            continue
+            # 获取UserUID
+            ueruid= userurl[userurl.rfind('/') + 1:]
+            MyUtils.delog(ueruid)
+            # allusers.add(useruid)
 
-        # 获取title
-        title = MyUtils.Element([page, By.XPATH, '//head/title[1]']).get_attribute('text')
-        title = title[0:len(title) - 5]
-        title = MyUtils.MyName(title)
+            # 取消喜欢
+            DouyinUtils.dislike([page])
+            MyUtils.delog('已取消喜欢')
 
-        # 获取UserID
-        s = MyUtils.Element([page, By.XPATH, '/html/head/meta[3]']).get_attribute('content')
-        UserID = s[s.rfind(' - ') + 3:s.rfind('发布在抖音，已经收获了') - 9]
+            # # 跳过UserUID已经记录的
+            if (ueruid in list(users.d.keys())):
+                MyUtils.delog('已在用户列表中')
+                continue
 
-        # 下载
-        VideoUrl = MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div[1]/div/div[2]/div[2]/xg-video-container/video/source[1]']).get_attribute(
-            'src')
-        path = '../抖音/' + UserID
-        MyUtils.CreatePath(path)
-        MyUtils.requestdownload(f'{path}/{title}.mp4', 'wb', VideoUrl)
-        LocalVideoSpectrum.add(VideoNum)
-        print(f'[抖音] {UserID}-{title}  下载完成，添加记录完成（安全）。')
-        print(f'{VideoUrl}')
+        #     查看是否需要记录UserUID
+            if likecount.get(ueruid)==None:
+                likecount.update({ueruid:1})
+                MyUtils.log('新用户')
+            else:
+                likecount.update({ueruid: likecount.get(ueruid) + 1})
+                MyUtils.log('出现过的的用户')
+                if likecount.get(ueruid)>1:
+                    likecount.update({ueruid:-111})
+                    MyUtils.log('记录了新用户')
+                    DouyinUtils.addauthor(ueruid, userid, users)
 
-    #     查看是否需要记录UserUID
-        if likecount.get(UserUID)==None:
-            likecount.update({UserUID:1})
-            print('[Main]添加了新用户')
-        else:
-            likecount.update({UserUID:likecount.get(UserUID)+1})
-            print('[Main]已经出现过的用户')
-            if likecount.get(UserUID)>1:
-                likecount.update({UserUID:0})
-                print('[Main]记录了新用户')
-                LocalUserSpectrum.add(UserUID)
+            MyUtils.log(f'上个作品添加下载耗时{MyUtils.counttime(stole)}')
+            MyUtils.delog(likecount)
+        # 结束
+        page.quit()
+        raise MyUtils.MyError
 
-        print(likecount)
-    # 结束
-    page.quit()
-
-finally:
-    LocalVideoSpectrum.save()
-    LocalUserSpectrum.save()
-
-sys.exit(0)
+if  __name__=='__main__':
+    main()

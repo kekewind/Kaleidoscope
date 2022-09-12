@@ -21,7 +21,7 @@ while True:
     # 获取变量
     Answer=MyUtils.Element([page, By.XPATH, '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div'])
     te=Answer.text
-    title=MyUtils.filename(te[:80])
+    title=MyUtils.standarlizedFile(te[:80])
     # StarredList=MyUtils.Elements([page, By.XPATH, '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div'])
 
     # 保存文本

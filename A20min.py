@@ -11,11 +11,11 @@ c=[]
 
 def record():
     while True:
-        print('[record] begin')
+        print('[allpieces] begin')
         global c
         cc=input()
         c.append(cc)
-        print('[record] end')
+        print('[allpieces] end')
 
 def writedown():
     while True:
