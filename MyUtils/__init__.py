@@ -1,5 +1,6 @@
 import datetime
 import inspect
+import random
 import json
 import multiprocessing
 import os
@@ -35,9 +36,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 def listed(func):
     def inner(*a):
         res=[]
-        if type(a[0])==list:
-            for i in a[0]:
-                res.append(func(i))
+        if type(a[-1])==list:
+            b=a[:-1]
+            for i in a[-1]:
+                res.append(func(*b,i))
             return res
         else:
             return func(*a)
@@ -191,11 +193,20 @@ def tellstringsame(s1, s2):
     return TellStringSame(s1, s2)
 
 
+def cutvideo(inputpath, outputpath, start, end):
+    # 使用ffmpeg剪切视频
+    sourcepath = os.path.abspath(inputpath)
+    command = f'ffmpeg  -i {inputpath} -vcodec copy -acodec copy -ss {start} -to {end} {outputpath} -y'
+    os.system('"%s"' % command)
+
+@listed
 def info(s):
     # 综合返回磁盘空间、文件夹或者文件信息、变量大小和类型
+    # 类型错误
     if type(s) in [int, ]:
         warn(f'用法错误。传入参数为{type(s)}类型')
         return
+    # 磁盘
     if len(s) == 1 and type(s) == str:
         gb = 1024 ** 3  # GB == gigabyte
         try:
@@ -207,7 +218,7 @@ def info(s):
         # log('已经使用的 : {:6.2f} GB '.format(used_b / gb))
         # log('未使用的 : {:6.2f} GB '.format(free_b / gb))
         return (free_b / gb)
-
+    # 文件
     if type(s) != str or type(s) == str and not os.path.exists(s[:224]):
         try:
             tip(f'类型：{type(s)} 大小：{int(int(sys.getsizeof(s) / 1024 / 1024 * 100) / 100.0)}MB 内存地址：{id(s)} 长度{len(list(s))}')
@@ -223,13 +234,6 @@ def info(s):
     if os.path.exists(path):
         if not path.rfind('.') > 1:
             ()
-
-
-def cutvideo(inputpath, outputpath, start, end):
-    # 使用ffmpeg剪切视频
-    sourcepath = os.path.abspath(inputpath)
-    command = f'ffmpeg  -i {inputpath} -vcodec copy -acodec copy -ss {start} -to {end} {outputpath} -y'
-    os.system('"%s"' % command)
 
 
 # endregion
@@ -607,6 +611,25 @@ def scrshot(l):
 
 # 文件读写
 # region
+# 重命名
+def rename(s1,s2):
+    os.rename(standarlizedPath(s1),standarlizedPath(s2))
+
+# 判断文件
+def isfile(s):
+    s=standarlizedPath(s)
+    if os.path.exists(s):
+        if None==listfile(s) and None==listdir(s):
+            return True
+    return False
+
+# 判断文件夹
+def isdir(s):
+    s=standarlizedPath(s)
+    if os.path.exists(s):
+        if list==type(listfile(s)):
+            return True
+    return False
 
 # 复制文件夹
 def copydir(s1,s2):
@@ -619,10 +642,9 @@ def copyfile(s1,s2):
     s1,s2=filename(s1,s2)
     shutil.copy(s1,s2)
 
-# 移动文件
+# 移动
 def move(s1,s2):
-    s1,s2= standarlizedPath(s1), pathname(s2+'/')
-    shutil.move(standarlizedPath(s1),createpath(s2))
+    shutil.move(standarlizedPath(s1),standarlizedPath(s2))
 
 def listdir(path):
     path = standarlizedPath(path)
@@ -842,12 +864,18 @@ def file(mode, path, IOList=None, encoding=None):
 
 
 def DesktopPath(s=''):
+    if s=='new':
+        s=random.randint(0,99999)
+        s=str(s)
+        log(f'桌面新建：{s}')
     return 'C:/Users/17371/Desktop/' + s
 
 
 def desktoppath(s=''):
     return DesktopPath(s)
 
+def desktop(s=''):
+    return DesktopPath(s)
 
 class txt():
     def __init__(self, path, encoding='utf-8'):

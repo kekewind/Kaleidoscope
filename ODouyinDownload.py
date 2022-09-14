@@ -74,7 +74,6 @@ def detect(path, author, VideoNum, l):
     MyUtils.delog(index)
     isPageUsing[index] = 1
     page = pages[index]
-    MyUtils.delog(0)
     (flag,)=l
     # endregion
     MyUtils.delog(f' trying to get {f"https://www.douyin.com/video/{VideoNum}"} ...')

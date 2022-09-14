@@ -187,14 +187,17 @@ def checkisindisk(record,func,):
     MyUtils.log(f'{length1}->{record.length()}')
 
 # 一般需要的实现（可选）：
+# count
 # 已下载添加作品记录
 # 已下载添加作者记录
+# makerecord
 # 手动删除作者
 # 自动删除作品
-# 手动添加作者
-
 # *删除不存在的作品记录
+# delete
+# 手动添加作者
 # *统计重复的作品
+# duplication
 
 
 try:

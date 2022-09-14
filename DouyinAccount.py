@@ -37,7 +37,7 @@ def main():
         DouyinUtils.HostPiecesLike([page])
 
         # 下滚，保存url列表
-        # MyUtils.scroll([page])
+        MyUtils.scroll([page])
         urllist=[]
         stole=MyUtils.nowstr()
         for VideoElement in DouyinUtils.HostPieces([page]):
