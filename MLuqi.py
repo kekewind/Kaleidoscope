@@ -16,7 +16,7 @@ def makerecord():
 
 def  main():
     pass
-
+    makerecord()
 
 if __name__=='__main__':
     main():
