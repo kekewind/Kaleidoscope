@@ -1,9 +1,23 @@
 ### Python template
 # Byte-compiled / optimized / DLL files
-bili/DownKyi-1.5.0-alpha7
-self/
+/.idea/
+/.run/
+.run/
+/repacktogithub
+/error/
+*.mp4
+Desktoppath.txt
+ActiveDisk.txt
+tiktok/ReadytoDownload.txt
+抖音/ReadytoDownload.txt
+抖音/ReadytoDownload_backup.txt
 抖音/故障
-TEST/
+bili/DownKyi-1.5.0-alpha7
+bili/DownKyi-1.5.3
+bili/BilibiliVideoDownload
+bili/DownKyi-1.5.2
+收藏/
+self/
 PicCache/
 __pycache__/
 *.py[cod]
@@ -143,3 +157,4 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+!/.gitignore
