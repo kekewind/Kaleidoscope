@@ -1,0 +1,206 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int getindex(int* array, int value,int length);
+int fill(int* Pre, int* In, int* Post, int N);
+
+int main()
+{
+    //读入N
+    int N;
+    int lost_num[4];
+    char string[999];
+    scanf("%d\n", &N);
+    //读入到数组，数组结尾-1表示，并记录缺失的数字个数
+    int Input(int a[],int j)
+    {
+        for (int i = 0; i < N; i++)
+        {
+            scanf("%s",string);
+            if (string[0] == '-')
+            {
+                string[0]=='0';
+                lost_num[j]+=1;
+            }
+            a[i] = atoi(string);
+        }
+    }
+    //中序
+    int In[999];
+    In[N] = -1;
+    Input(In,0);
+    //前序
+    int Pre[999];
+    Pre[N] = -1;
+    Input(Pre,1);
+    //后序
+    int Post[999];
+    Post[N] = -1;
+    Input(Post,2);
+
+    int flag=1;
+    flag = fill(Pre, In, Post, N);
+
+
+    //生成level order
+    int Level[999];
+    int end = 0;//上一层右下标（中序）
+    Level[0] = Pre[0];
+    int start = 0;//当前层左下标（中序）
+    int count=0;
+    //逐层更新
+    if (flag)
+    {
+        while (count < N - 1)
+        {
+            //寻找下一层的根结点
+            int incr = 0;//end的增量
+            for (int i = start; i <= count; i++)
+            {
+                //先获取当前层结点（作为根节点）在中序中的位置
+                int index = getindex(In, Level[i],N);
+                int left = 0;
+                int right = 0;
+
+                ///尝试从后序找可能的右子节点值
+                if (getindex(Post, Level[i],N) != 0)
+                    right = Post[getindex(Post, Level[i],N) - 1];
+                ///尝试从前序找可能的左子节点值
+                if (getindex(Pre, Level[i],N) != N - 1)
+                    left = Pre[getindex(Pre, Level[i],N) + 1];
+
+                //有可能的左子节点，且中序在根前，说明是左子节点
+                if (left && getindex(In, left,N) < index)
+                {
+                    incr++;
+                    Level[++end] = left;
+                }
+                //有可能的右子节点，且中序在根后，说明是右子节点
+                if (right && getindex(In, right,N) > index)
+                {
+                    incr++;
+                    Level[++end] = right;
+                }
+                start++;
+            }
+            count+=incr;
+        }
+    }
+
+
+    //输出
+    if (flag == 1)
+    {
+        int output(int a[])
+        {
+            for (int i = 0; i < N; i++)
+                printf("%d ", a[i]);
+            printf("\n");
+        }
+        output(In);
+        output(Pre);
+        output(Post);
+        output(Level);
+        return;
+    }
+    printf("Impossible");
+}
+
+
+
+//工具函数，值->下标
+int getindex(int array[], int value,int length)
+{
+    int i = 0;
+    while (array[i]!=-1&&i<length+1)
+    {
+        if (array[i] == value) return i;
+        i++;
+    }
+    return -1;//找不到返回-1
+}
+
+int fill(int* Pre, int* In, int* Post, int N)
+{
+    //变量
+    //所有出现过的数
+    int appeared[999];
+    int end = -1;
+    appeared[0] = -1;//-1标记appeared的末尾
+    //缺失个数
+    int pre_lost = 0;
+    int in_lost = 0;
+    int post_lost = 0;
+
+    //统计appeared
+    for (int i = 0; i < N; i++)
+    {
+        void store(int a[],int b[],int i,int *end)
+        {
+            if (getindex(a, b[i],N) < 0&&b[i]!=0)
+            {
+                int cursor;
+                cursor=*end+1;
+                appeared[cursor] = b[i];
+                cursor+=1;
+                appeared[cursor] = -1;
+                *end+=2;
+            }
+        }
+        store(appeared,In,i,&end);
+        store(appeared,Pre,i,&end);
+        store(appeared,Post,i,&end);
+
+    }
+    //数组长度小于1时，直接搞
+    if (N <= 1)
+    {
+        In[0] = appeared[0];
+        Pre[0] = appeared[0];
+        Post[0] = appeared[0];
+        return 1;
+    }
+
+    //处理前序后序中的根节点（补全前序首端和后序末端）
+    {
+        if (Pre[0] != 0 && Post[N - 1] == 0) Post[N - 1] = Pre[0];
+        if (Post[N - 1] != 0&&Pre[0] == 0) Pre[0] = Post[N - 1];
+        if (Post[N - 1] == 0 && Pre[0] == 0) return 0;
+    }
+
+    for(int i=0; i<N; i++)
+        //统计lost
+    {
+        if (In[i] == 0)
+            in_lost++;
+        if (Pre[i] == 0)
+            pre_lost++;
+        if (Post[i] == 0)
+            post_lost++;
+    }
+
+    if (end == N) return 1;//完成
+    else if (end < 0) return 0;
+
+    //先获取根结点在中序中的位置
+    if (getindex(In, Pre[0],N) < 0 && in_lost == 1)
+    {
+        for (int i = 0; i < N; i++)
+            if (In[i] == 0)
+            {
+                In[i] = Pre[0];
+                break;
+            }
+    }
+    else if (getindex(In, Pre[0],N) < 0 && in_lost != 1)
+        return 0;
+    int index = getindex(In, Pre[0],N);
+
+    if (index < N - 1 && index > 0)//存在左右子树
+        return (fill(Pre + 1,In, Post, index) &&
+                fill( Pre + 1 + index,In + index+1, Post + index, N - index - 1));
+    if (index > N - 2)//无右子树
+        return (fill(Pre + 1,In,  Post, N - 1));
+    if (index <1)//无左子树
+        return fill(Pre + 1,In+1,  Post, N - 1);
+}

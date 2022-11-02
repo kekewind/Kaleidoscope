@@ -1,0 +1,3 @@
+import MyUtils
+
+MyUtils.WARN()

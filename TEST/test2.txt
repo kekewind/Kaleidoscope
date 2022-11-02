@@ -1,0 +1,117 @@
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+from selenium.webdriver.common.by import By
+import MyUtils
+# 下载
+def Download():
+    global DouyinSum
+    while not ReadyToDownload.items() == []:
+        (title, VideoUrl) = ReadyToDownload.items().pop(0)
+        if MyUtils.MyPageDownload(VideoUrl, f'{path}/{title}.mp4', t=30):
+            LocalVideoSpectrum.add(VideoNum)
+        else:
+            Failed.add(title + '.mp4.crdownload')
+        DouyinSum += 1
+        print(f'[抖音{DouyinSum}]{HostID}  :')
+        print(f'视频编号：{VideoNum}    视频标题：{title}\n{VideoUrl}')
+# 下载页检测title
+def detect(VideoNum):
+    global cool
+    cool += 1
+    page = MyUtils.MyEdge(f'https://www.douyin.com/video/{VideoNum}', silent=True)
+    time.sleep(2)
+    # 获取标题
+    title = MyUtils.title([page])
+    if not title:
+        print(f'Detect title failed.you may try https://www.douyin.com/video/{VideoNum}')
+        time.sleep(10)
+        detect(VideoNum)
+    title = title.strip(' - 抖音')
+    # 如果下载过
+    if os.path.exists(f'{path}/{title}.mp4'):
+        LocalVideoSpectrum.add(VideoNum)
+        print(f'{title}已下载过')
+        page.quit()
+        cool -= 1
+        return
+    page.quit()
+    page = MyUtils.MyEdge(f'https://www.douyin.com/video/{VideoNum}', silent=None)
+    page.minimize_window()
+    # 获取下载地址
+    VideoUrl = MyUtils.\
+        MyElement(silent=True,l=[page, By.XPATH,'/html/body/div[1]/div/div[2]/div/div/div[1]/div[1]/div[2]/div/div[1]/div/div[2]/div[2]/xg-video-container/video/source[1]'])\
+        .get_attribute('src')
+    ReadyToDownload.update({title: VideoUrl})
+    cool -= 1
+# 初始化
+Failed = MyUtils.RefreshTXT('../抖音/Failed.txt')
+print(f'Failed:{Failed.length()}')
+LocalUserSpectrum = MyUtils.RefreshTXT('../抖音/UserSpectrum.txt')
+LocalVideoSpectrum = MyUtils.RefreshTXT('../抖音/VideoSpectrum.txt')
+print('LocalVideo: ', LocalVideoSpectrum.length(), ' LocalUser: ', LocalUserSpectrum.length())
+DouyinHost = MyUtils.MyEdge()
+UserUID = 1
+ReadyToDownload = {}
+DouyinSum = 0
+cool = 0
+pool=ThreadPoolExecutor(max_workers=5)
+try:
+    while UserUID != None:
+        # 用户循环
+        UserUID = LocalUserSpectrum.get()
+        # 自动去掉UserUID的url前缀
+        if UserUID.find('www.douyin.com') > 0:
+            LocalVideoSpectrum.delete(UserUID)
+            UserUID.replace('https://www.douyin.com/user/', '')
+            LocalVideoSpectrum.add(UserUID)
+        if UserUID == None:
+            sys.exit()
+        # 用户主页处理
+        DouyinHost.get('https://www.douyin.com/user/' + UserUID.replace('https://www.douyin.com/user/', ''))
+        MyUtils.MySkip([DouyinHost, By.ID, "captcha-verify-image"],True)
+        MyUtils.MySkip([DouyinHost, By.ID, "login-pannel"])
+        MyUtils.MyScroll([DouyinHost])
+        HostID = MyUtils.MyElement([DouyinHost, By.XPATH, '/html/head/title']).get_attribute('text')
+        HostID = HostID[0:HostID.rfind('的主页')]
+        path = '../抖音/' + HostID
+        try:
+            PiecesNum = int(MyUtils.MyElement([DouyinHost, By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[4]/div[1]/div[1]/div[1]/span']).text)
+        except:
+            print('https://www.douyin.com/user/' + UserUID)
+            LocalUserSpectrum.Rollback()
+            input('按键停止')
+        # 作品列表循环
+        for VideolElement in MyUtils.MyElements([DouyinHost, By.XPATH, '//a[starts-with(@href,"//www.douyin.com/video/")]']):
+            VideoUrl = VideolElement.get_attribute('href')
+            VideoNum = VideoUrl[VideoUrl.rfind('/') + 1:len(VideoUrl)]
+            i = 0
+            # 如果下载过
+            # if (VideoNum + '\n' in LocalVideoSpectrum.l):
+            #     tell = True
+            #     AlreadyDownloadedNum += 1
+            #     continue
+            # 获取title并检查
+            print(ReadyToDownload)
+            pool.submit(detect,VideoNum)
+            #     同时进行请求队列减速
+            while cool > 5:
+                time.sleep(5)
+            # 减速-网页请求总数累计检测减速
+            # if i>50:
+            #     i=0
+            #     print('减速-检索是否下载过')
+            #     time.sleep(7)
+        # 下载
+        pool.submit(Download)
+        print(f"[抖音{LocalUserSpectrum.loopcount}/{LocalUserSpectrum.length()}]", HostID, "已检测", )
+finally:
+    LocalUserSpectrum.save()
+    print('UserSpectrum processing. LocalVideo: ', LocalVideoSpectrum.length(), ' LocalUser: ', LocalUserSpectrum.length())
+    print(f'Failed:{Failed.length()}')
+    DouyinHost.quit()
+    # VideoPage.set_window_size(900,1000)
+import os.path
+2
+988798
