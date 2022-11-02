@@ -68,6 +68,7 @@ Python Selenium 有颜色的爬虫
 第二件事：确保项目根目录是D:/Kaleidoscope
 
 第三件事：更改项目根目录下的ActiveDisk.txt。内容改成一个大写字母你要存储的磁盘。就一行，不要有多的空格换行啥的
+类似的，更改项目分目录下的Desktoppath.txt。
 
 第四件事：运行里面的各种.py文件或者阅读代码即可
 
