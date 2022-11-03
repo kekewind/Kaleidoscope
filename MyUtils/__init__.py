@@ -406,12 +406,19 @@ def tellstringsame(s1, s2):
     return TellStringSame(s1, s2)
 
 
+# 使用ffmpeg剪切视频
 def cutvideo(inputpath, outputpath, start, end):
-    # 使用ffmpeg剪切视频
     sourcepath = os.path.abspath(inputpath)
-    command = f'ffmpeg  -i {standarlizedPath(inputpath)} -vcodec copy -acodec copy -ss {start} -to {end} {outputpath} -y'
+    command = f'ffmpeg  -i {standarlizedPath(sourcepath)} -vcodec copy -acodec copy -ss {start} -to {end} {outputpath} -y'
+    print(command)
     os.system('"%s"' % command)
 
+# 使用ffmpeg提取音频
+def extractaudio(inputpath,outputpath):
+    sourcepath = os.path.abspath(standarlizedPath(inputpath))
+    command = f'ffmpeg -i {inputpath} -vn -codec copy {outputpath}'
+    print(command)
+    os.system('"%s"' % command)
 
 def info(s):
     # 磁盘空间、文件（夹）信息、变量大小和类型
@@ -1865,6 +1872,8 @@ def strre(s, pattern):
 
 #   更改工作目录
 def setRootPath():
+    if not os.path.exists(f'{activedisk.l[0]}:/'):
+        Exit(f'{activedisk.path} ：{activedisk.l}，请检查。')
     for i in activedisk.l:
         if info(i) >= 0.2:
             os.chdir(i + ':/')
