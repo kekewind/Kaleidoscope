@@ -1,3 +1,7 @@
+# 由于github长期被傻逼封禁， 放上gitee链接：https://e.gitee.com/v000666/projects/441871/repos/v000666/Kaleidoscope/sources
+
+
+
 # Kaleidoscope
 
 Python Selenium 有颜色的爬虫
