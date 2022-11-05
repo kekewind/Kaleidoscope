@@ -7,7 +7,7 @@ import time
 from collections.abc import Iterable
 
 import cv2
-
+import pywin32
 import MyUtils
 
 
