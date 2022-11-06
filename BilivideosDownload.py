@@ -28,25 +28,24 @@ def detect(UserUID):
     return res.json()
 
 
-def download(vlist):
+def download():
     for bvid in vlist:
-        MyUtils.log(f'{bvid}   -用户{useruid}')
         if BUtils.skipdownloaded(bvid):
             continue
         pyperclip.copy(f'https://www.bilibili.com/video/{bvid}')
-        pyautogui.click(1449, 214)
+        MyUtils.click(1449, 214)
         time.sleep(0.5)
-        pyautogui.click(988, 500)
+        MyUtils.click(988, 500)
         time.sleep(1)
         pyautogui.hotkey('ctrl', 'v')
         pyautogui.hotkey('enter')
         time.sleep(2)
 
-        pyautogui.click(708, 504)
+        MyUtils.click(708, 504)
         time.sleep(0.5)
-        pyautogui.click(1208, 576)
+        MyUtils.click(1208, 576)
         time.sleep(0.5)
-        pyautogui.click(1246, 722)
+        MyUtils.click(1246, 722)
 
         # count += 1
         # if count > MAX:
@@ -58,54 +57,54 @@ def download(vlist):
 page = 1
 VideoSpectrum = BUtils.videospectrum
 UserSpectrum = BUtils.videouserspectrum
+readytodownload=BUtils.readytodownload
 currentuser = MyUtils.cache('./bili/CurrentUser.txt')
 count = 0
 MAX = 9999
 useruid = ''
 cachepath = './bili/cache'
 
-
+# 添加新的用户
 def step0():
     BUtils.addwebuser()
-    pyautogui.hotkey('alt', 'tab')
-
 
 step0()
 
 
 @retry(retry_on_exception=MyUtils.retry)
 def main():
+    vlist = []
+    # 准备工作 - 检查为空，添加下载列表
     def step1():
         checkempty()
-        user = UserSpectrum.get()[0]
+        c=UserSpectrum.get()
+        print(c)
+        user = c[0]
         useruid = MyUtils.key(user)
-        currentuser.add(user)
         res = detect(useruid)
 
+
         # 获取json中的量
-        vlist = []
         for a in res['data']['list']['vlist']:
             vlist.append(a['bvid'])
-            # tttt = a['length']
-            # tim += int(tttt[:tttt.find(':')])
+        readytodownload.add({useruid:vlist})
+        readytodownload.add({useruid:vlist})
 
-        download(vlist)
-
+    # 使用下载器下载
     def step2():
-        pass
+        pyautogui.hotkey('alt', 'tab')
+        download(vlist)
+        pyautogui.hotkey('alt', 'tab')
 
+    # 等待下载完毕后转移文件
     def step3():
-        user = currentuser.get()
-        if user == None:
-            MyUtils.warn(f'{currentuser.path}可能为空')
-            sys.exit(-1)
-        uid = MyUtils.key(user)
+        useruid=readytodownload.get()
         for i in MyUtils.listdir('./bili/cache'):
             j = MyUtils.filename(i)
-            j, what = MyUtils.cuttail([j], '-')
-            j, bvid = MyUtils.cuttail([j], '-')
-            title, author = MyUtils.cuttail([j], '-')
-            MyUtils.move(i, f'./bili/{author}_{uid}/{title}_{bvid}')
+            j = MyUtils.removetail(j, '-')
+            j, bvid = MyUtils.cuttail(j, '-')
+            title, author = MyUtils.cuttail(j, '-')
+            MyUtils.move(i, f'./bili/{author}_{useruid}/{title}_{bvid}')
 
     step1()
     # step2()

@@ -9,6 +9,7 @@ videouserexpired = MyUtils.RefreshTXT('D:\Kaleidoscope/bili/VideoUserExpired.txt
 coverspectrum = MyUtils.RefreshTXT('D:\Kaleidoscope/bili//CoverSpectrum.txt')
 coveruserspectrum = MyUtils.RefreshTXT('D:/Kaleidoscope/bili/CoverUserSpectrum.txt')
 downloadedindisk = MyUtils.RefreshTXT('./bili/Downloaded.txt')
+readytodownload=MyUtils.cache("D:/Kaleidoscope/bili/ReadytoDownload.txt")
 missing = MyUtils.rjson('D:\Kaleidoscope/bili/Missing.txt')
 
 

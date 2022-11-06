@@ -16,6 +16,7 @@ import selenium
 import urllib3
 import win32api
 import win32con
+import PySimpleGUI
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
@@ -23,7 +24,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
-import MyUtils
 
 
 # region
@@ -346,7 +346,8 @@ def look(path):
 
 
 def WARN(s):
-    win32api.MessageBox(None,s,'Kaleidoscope',win32con.MB_OK)
+    now=Time()
+    win32api.MessageBox(None,s,f'Kaleidoscope{now.time()}',win32con.MB_OK)
 
 def size(a, sum=0):
     if type(a) in [str]:
@@ -831,6 +832,7 @@ def edge(url='', silent=None):
 def click(x, y, button='left'):
     try:
         pyautogui.click(x, y, button=button)
+        console(f'{x}   {y}')
     except Exception as e:
         if type(e) in [pyautogui.FailSafeException]:
             warn(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
@@ -1013,7 +1015,7 @@ def modifytime(path):
 
 # 新建文件以进行标准输出
 def out(s):
-    f = MyUtils.txt('new')
+    f = txt('new')
 
     @listed
     def do(s):
@@ -1061,7 +1063,7 @@ def copyfile(s1, s2):
 
 # 移动
 def move(s1, s2):
-    MyUtils.createpath(s2)
+    createpath(s2)
     shutil.move(standarlizedPath(s1), standarlizedPath(s2))
 
 
@@ -1510,6 +1512,8 @@ class RefreshJson(Json, RefreshTXT):
             else:
                 Exit(f'{e}')
         ret = []
+        if value(d)==[]:
+            return {key(d):None}
         for i in value(d):
             ret.append({key(d): i})
         return ret
@@ -1599,7 +1603,7 @@ class RefreshJson(Json, RefreshTXT):
             break
 
     def pieceinfo(self, num, author, title):
-        return json.dumps({str(num): {'disk': MyUtils.diskname, 'author': author, 'title': title}}, ensure_ascii=False)
+        return json.dumps({str(num): {'disk': diskname, 'author': author, 'title': title}}, ensure_ascii=False)
 
     def addpiece(self, num, author, title):
         piece = jsontodict(self.pieceinfo(num, author, title))
@@ -1658,6 +1662,18 @@ def alert(s=''):
 
     p.execute(do, )
 
+def console(s,text_color='#F08080',font=('Hack',14),size=28):
+    # 系统默认颜色
+    # COLOR_SYSTEM_DEFAULT='1234567890'=='ADD123'
+    global win
+    layout = [[PySimpleGUI.Text(s, background_color='#add123', pad=(0, 0),
+                                text_color=text_color,font=font)]]
+    win = PySimpleGUI.Window('', layout, no_titlebar=True, keep_on_top=True,
+        location=(120*16/3*2, 0), auto_close=True, auto_close_duration=999,
+        transparent_color='#add123', margins=(0, 0))
+    event, values = win.read(timeout=0)
+    time.sleep(1)
+    return win
 
 def Log(s, x1, x2, x3=7, x4=30, x5=30):
     s = str(s)
@@ -1691,7 +1707,6 @@ def Log(s, x1, x2, x3=7, x4=30, x5=30):
     print(
         f'[{Logcount}] \033[7;{x5}m  {str(t.time())[:-7]} \033[{x1};{x2}m {pp4} {pp5}  <line {pp6}> ==》 {pp1} {pp2}  <line {pp3}> \033[0m' + s2)
     Logcount += 1
-
 
 @listed
 def log(*a):
@@ -1761,7 +1776,7 @@ def set(l):
 
 
 def simplinfo(num, author, title):
-    return json.dumps({str(num): {'disk': MyUtils.diskname, 'author': author, 'title': title}}, ensure_ascii=False)
+    return json.dumps({str(num): {'disk': diskname, 'author': author, 'title': title}}, ensure_ascii=False)
 
 
 def extend(l1, l2):
@@ -1825,24 +1840,20 @@ def value(d):
 # region
 
 # 截取字符串末尾
-def cuttail(l, mark='_'):
-    if not type(l) == list:
+def cuttail(s, mark='_'):
+    if type(s) == list:
         warn('用法错误。')
         sys.exit(-1)
-    s = l[0]
     s, mark = str(s), str(mark)
     ret = tail(s, mark)
     s = s[:(s.rfind(mark) - len(mark) + 1)]
     return s, ret
 
-
 def splittail(s, mark):
-    return cuttail([s], mark)
+    return cuttail(s, mark)
 
-
-def removetail(l, mark='.'):
-    return cuttail(l, mark)
-
+def removetail(s, mark='.'):
+    return cuttail(s, mark)[0]
 
 def strip(s, mark):
     pass

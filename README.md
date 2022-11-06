@@ -93,3 +93,7 @@ selenium、python、垃圾回收机制导致性能开销极大（主要是CPU开
 PS 刚看了一眼github上的主要竞争对手，啐，什么垃圾，收费，代码项目千奇百怪乱七八糟，还是几十年前的（翻白眼）
 
 大家快来贡献啊~白痴代码谁都能写的 反向push抖音字节跳动推出反爬措施（bushi
+
+# Appendix
+2022-11-6
+*添加了console需要使用的字体https://github.com/subframe7536/Maple-font/releases
