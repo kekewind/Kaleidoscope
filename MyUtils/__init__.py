@@ -1663,8 +1663,11 @@ def alert(s=''):
     p.execute(do, )
 
 def console(s,text_color='#F08080',font=('Hack',14),size=28):
+    consoletxt.add({nowstr():s})
+
     # 系统默认颜色
     # COLOR_SYSTEM_DEFAULT='1234567890'=='ADD123'
+
     global win
     layout = [[PySimpleGUI.Text(s, background_color='#add123', pad=(0, 0),
                                 text_color=text_color,font=font)]]
@@ -1929,6 +1932,7 @@ root = root[:root.rfind('/')] + '/'
 Logcount = 0
 activedisk = txt('D:/Kaleidoscope/ActiveDisk.txt')
 disknames = RefreshTXT("D:/Kaleidoscope/disknames.txt")
+consoletxt = json('D:/Kaleidoscope/console.txt')
 setRootPath()
 diskinfo = RefreshJson('./diskInfo.txt')
 diskname = getdiskname()
