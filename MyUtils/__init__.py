@@ -1932,7 +1932,7 @@ root = root[:root.rfind('/')] + '/'
 Logcount = 0
 activedisk = txt('D:/Kaleidoscope/ActiveDisk.txt')
 disknames = RefreshTXT("D:/Kaleidoscope/disknames.txt")
-consoletxt = json('D:/Kaleidoscope/console.txt')
+consoletxt = Json('D:/Kaleidoscope/console.txt')
 setRootPath()
 diskinfo = RefreshJson('./diskInfo.txt')
 diskname = getdiskname()
