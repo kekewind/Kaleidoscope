@@ -7,7 +7,9 @@ import time
 from collections.abc import Iterable
 
 import cv2
-import pywin32
+import win32api
+import win32con
+
 import MyUtils
 
 
@@ -17,7 +19,4 @@ def main(start, *a, **b):
 
 
 if __name__ == "__main__":
-    lis1 = MyUtils.listfile('D:/Kaleidoscope')
-    lis2 = MyUtils.listdir('D:/Kaleidoscope')
-    for i in lis1:
-        MyUtils.copyfile(i, f'D:/Kaleidoscope/repacktogithub/Kaleidoscope/{MyUtils.gettail(i, "/")}')
+    win32api.MessageBox(None,'SAMPLE','title?',win32con.MB_OK)

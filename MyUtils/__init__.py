@@ -345,11 +345,8 @@ def look(path):
     os.startfile(path)
 
 
-def WARN():
-    pyautogui.hotkey('winleft', 'd')
-    time.sleep(0.5)
-    pyautogui.hotkey('winleft', 'd')
-
+def WARN(s):
+    win32api.MessageBox(None,s,'Kaleidoscope',win32con.MB_OK)
 
 def size(a, sum=0):
     if type(a) in [str]:
