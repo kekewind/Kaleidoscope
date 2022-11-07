@@ -21,7 +21,7 @@ def CreatePath(path):
             print(f'Create {path} Failed. ')
 
 
-def file(mode, path, IOList=None, encoding='gbk'):
+def file(mode, path, IOList=None, encoding='utf-8'):
     CreatePath(path)
     # 比特流
     if mode == 'rb':
@@ -47,7 +47,7 @@ def file(mode, path, IOList=None, encoding='gbk'):
         if not os.path.exists(path):
             file('w', path, [])
             return []
-        with open(path, mode='r', encoding='gbk') as file:
+        with open(path, mode='r', encoding='utf-8') as file:
             content = file.readlines()
             newset = list(set(content))
             newset.sort(key=content.index)

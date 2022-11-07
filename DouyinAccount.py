@@ -102,7 +102,7 @@ def main():
                 MyUtils.delog('已在用户列表中')
                 continue
 
-            #     查看是否需要记录UserUID
+            #     查看是否需要记录UserUID，出现重复超过1次的用户即记录
             if likecount.get(ueruid) == None:
                 likecount.update({ueruid: 1})
                 MyUtils.log('新用户')

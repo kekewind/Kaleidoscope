@@ -8,7 +8,8 @@ import re
 import shutil
 import sys
 import time
-
+import io
+import sys
 import pyautogui
 import pyperclip
 import requests
@@ -23,6 +24,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
 
@@ -162,9 +164,11 @@ class Time():
         # 如果是一个变量，就是timestamp或者字符串
         # 如果是三个数字，就默认是时分秒，年月日定为现在
         # 如果是六个数字就默认是年月日，时分秒定位0
-        def init(self, year=now().year, month=now().month, day=now().day, hour=now().hour, min=now().minute, sec=now().second, mic=now().microsecond):
-            self.t = datetime.datetime(year, month, day, hour, min, sec, mic)
+        def reset(self, year=now().year, month=now().month, day=now().day, hour=now().hour, min=now().minute, sec=now().second, mic=now().microsecond):
+            self[0].t = datetime.datetime(year, month, day, hour, min, sec, mic)
 
+        # 默认设置为现在时间
+        reset([self])
         year, month, day, hour, min, sec, mic = now().year, now().month, now().day, now().hour, now().minute, now().second, now().microsecond
         if b == {}:
             if len(a) in [1]:
@@ -178,16 +182,20 @@ class Time():
                     self.t = newself.t
                     return
             if len(a) in [3]:
-                hour, min, sec = a
-                init(self, hour=hour, min=min, sec=sec)
-            if len(a) in [6]:
-                year, month, day = a
-                init(self, year, month, day, 0, 0, 0)
+                if a[0]<30:
+                    hour, min, sec = a
+                    reset([self], hour=hour, min=min, sec=sec)
+                else:
+                    year,month,hour=a
+                    reset([self], year=year, month=month, hour=hour)
+            if len(a) in [6,7]:
+                reset([self], *a)
+        # 是通过*b传参，则忽略所有的*a
         else:
-            init(self, b)
+            reset([self], b)
             year, month, day, hour, min, sec, mic = b['year'], b['month'], b['day'], b['hour'], b['min'], b['sec'], b['mic']
-        timestamp = datetime.datetime(year, month, day, hour, min, sec, mic).timestamp()
-        self.t = datetime.datetime.fromtimestamp(timestamp)
+        # timestamp = datetime.datetime(year, month, day, hour, min, sec, mic).timestamp()
+        # self.t = datetime.datetime.fromtimestamp(timestamp)
 
     def __call__(self, *args, **kwargs):
         self.__init__()
@@ -236,14 +244,15 @@ class Time():
         # return f'{str(self.year).zfill(2)}-{str(self.month).zfill(2)}-{str(self.day).zfill(2)} {str(self.hour).zfill(2)}:{str(self.min).zfill(2)}:{str(self.sec).zfill(2)}.{str(self.mic).zfill(6)}'
         return str(self.t)
 
+    # 返回距离现在的时间或者两个时间类的差，返回绝对值（秒）
     def counttime(self, obj=None):
         def do(*a):
             if len(a) == 1:
                 s, = a
-                return -(s.t - datetime.datetime.now()).total_seconds()
+                return abs(s.t - datetime.datetime.now()).total_seconds()
             if len(a) == 2:
                 s1, s2 = a
-                return -(s1.t - s2.t).total_seconds()
+                return abs(s1.t - s2.t).total_seconds()
 
         if obj == None:
             return do(self)
@@ -338,11 +347,14 @@ def retry(e):
 
 # 特殊功能函数
 # region
+# 打开文件
 def look(path):
     if not isfile(path):
         warn(f'不存在文件{path}')
         return
     os.startfile(path)
+def Open(path):
+    return look(path)
 
 
 def WARN(s):
@@ -992,6 +1004,17 @@ def scrshot(l):
 
 # 文件读写
 # region
+# 判断是否是空的文件夹
+def isemptydir(path):
+    path=standarlizedPath(path)
+    if not isdir(path):
+        warn(f'{path}是文件夹？请检查路径。')
+        return False
+    if []==extend(listfile(path),listdir(path)):
+        return True
+    else:
+        return False
+
 # 访问时间
 def accesstime(path):
     path = standarlizedPath(path)
@@ -1022,6 +1045,7 @@ def out(s):
         f.add('\n' + s)
 
     do(s)
+    Open(f.path)
 
 
 # 重命名文件
@@ -1031,20 +1055,16 @@ def rename(s1, s2):
 
 # 判断文件
 def isfile(s):
-    s = standarlizedPath(s)
-    if os.path.exists(s):
-        if [] == listfile(s) and [] == listdir(s):
-            return True
-    return False
+    if not type(s)in [str]:
+        return False
+    return os.path.isfile(s)
 
 
 # 判断文件夹
 def isdir(s):
-    s = standarlizedPath(s)
-    if os.path.exists(s):
-        if list == type(listfile(s)):
-            return True
-    return False
+    if not type(s)in [str]:
+        return False
+    return os.path.isdir(s)
 
 
 # 复制文件夹
@@ -1139,6 +1159,17 @@ class csv():
 
 
 def deletedirandfile(l, silent=None):
+    # 删除txt里的文件
+    if isfile(l)and l[-4:]in '.txt':
+        f=txt(l)
+        dlis=[]
+        for i in f.l:
+            if i in ['\n','']:
+                continue
+            dlis.append(i)
+        deletedirandfile(dlis)
+        return
+
     # 递归删除dir_path目标文件夹下所有文件，以及各级子文件夹下文件，保留各级空文件夹
     # (支持文件，文件夹不存在不报错)
     def del_files(dir_path):
@@ -1456,8 +1487,16 @@ class Json(txt):
                 print(info(i))
                 sys.exit(-1)
 
+    def get(self):
+        ret=self.l[0]
+        if ret=='':
+            self.l.pop(0)
+            self.save()
+            return Json.get(self)
+        return jsontodict(ret)
+
     def add(self, d):
-        txt.add(self, dicttojson(d) + '\n')
+        txt.add(self, dicttojson(d))
         self.d.update(jsontodict(d))
 
 
@@ -1513,7 +1552,7 @@ class RefreshJson(Json, RefreshTXT):
                 Exit(f'{e}')
         ret = []
         if value(d)==[]:
-            return {key(d):None}
+            return [{key(d):None}]
         for i in value(d):
             ret.append({key(d): i})
         return ret
@@ -1662,21 +1701,39 @@ def alert(s=''):
 
     p.execute(do, )
 
-def console(s,text_color='#F08080',font=('Hack',14),size=28):
+def console(s,duration=999,text_color='#F08080',font=('Hack',14),size=28):
+    # 更新控制台
     consoletxt.add({nowstr():s})
+    while 3600<Now().counttime(Time(key(jsontodict(consoletxt.get())))):
+        consoletxt.l.pop(0)
+    consoletxt.save()
 
-    # 系统默认颜色
-    # COLOR_SYSTEM_DEFAULT='1234567890'=='ADD123'
+    #短暂显示桌面控制台
+    def display():
+        # 系统默认颜色
+        # COLOR_SYSTEM_DEFAULT='1234567890'=='ADD123'
+        global win
+        outs=''
+        inc=0
+        for i in consoletxt.l:
+            outs+=f'[{inc}]  {value(i)}\n'
+            inc+=1
+        layout = [[PySimpleGUI.Text(outs, background_color='#add123', pad=(0, 0),
+                                    text_color=text_color,font=font)]]
+        win = PySimpleGUI.Window('', layout, no_titlebar=True, keep_on_top=True,
+            location=(120*16/3*2, 0), auto_close=True, auto_close_duration=duration,
+            transparent_color='#add123', margins=(0, 0))
+        event, values = win.read(timeout=0)
+        time.sleep(0.3)
+        return win
+    shown=txt('D:/Kaleidoscope/ConsoleShow.txt')
+    shown.l=['1']
+    shown.save()
+    # 反复刷新控制台
+    while shown.l[0]=='1':
+        shown=txt('D:/Kaleidoscope/ConsoleShow.txt')
+        display()
 
-    global win
-    layout = [[PySimpleGUI.Text(s, background_color='#add123', pad=(0, 0),
-                                text_color=text_color,font=font)]]
-    win = PySimpleGUI.Window('', layout, no_titlebar=True, keep_on_top=True,
-        location=(120*16/3*2, 0), auto_close=True, auto_close_duration=999,
-        transparent_color='#add123', margins=(0, 0))
-    event, values = win.read(timeout=0)
-    time.sleep(1)
-    return win
 
 def Log(s, x1, x2, x3=7, x4=30, x5=30):
     s = str(s)
@@ -1707,8 +1764,12 @@ def Log(s, x1, x2, x3=7, x4=30, x5=30):
     s2 += '\033[0m'
     global Logcount
     t = now()
-    print(
-        f'[{Logcount}] \033[7;{x5}m  {str(t.time())[:-7]} \033[{x1};{x2}m {pp4} {pp5}  <line {pp6}> ==》 {pp1} {pp2}  <line {pp3}> \033[0m' + s2)
+    try:
+        s2.replace(u'\xa0',u'<?>')
+        print(
+            f'[{Logcount}] \033[7;{x5}m  {str(t.time())[:-7]} \033[{x1};{x2}m {pp4} {pp5}  <line {pp6}> ==》 {pp1} {pp2}  <line {pp3}> \033[0m' + s2)
+    except Exception as e:
+        print(f'这条日志输出失败了。原因{e}')
     Logcount += 1
 
 @listed

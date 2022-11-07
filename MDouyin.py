@@ -57,14 +57,12 @@ def adduser():
 
 
 # 统计总数
-def countRecord():
-    34170
-    373
+def count():
     MyUtils.log(f'作品总数：{allpieces.length()}')
     MyUtils.log(f"作者总数：{allusers.length()}")
     MyUtils.log(f"失败总数：{missing.length()}")
-    pyperclip.copy(f'{allpieces.length()}\n{allusers.length()}\n{missing.length()}')
-
+    # pyperclip.copy(f'{allpieces.length()}\n{allusers.length()}\n{missing.length()}')
+    for i in MyUtils.listdir()
 
 # 统计重复的作品
 def findduplicate():
@@ -95,7 +93,7 @@ def findduplicate():
 def main():
     # deleteRecorded()
     # deleteMissing()
-    countRecord()
+    count()
     # findduplicate()
 
 

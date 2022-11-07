@@ -12,11 +12,6 @@ MAX = 12
 count = 0
 
 
-def checkempty():
-    if not [] == MyUtils.listdir(cachepath):
-        MyUtils.warn('cache不为空。')
-        pyperclip.copy(MyUtils.standarlizedPath(cachepath))
-        sys.exit(-1)
 
 
 def detect(UserUID):
@@ -29,6 +24,8 @@ def detect(UserUID):
 
 
 def download():
+    c=readytodownload.get()
+    vlist=MyUtils.key(c)
     for bvid in vlist:
         if BUtils.skipdownloaded(bvid):
             continue
@@ -68,7 +65,7 @@ cachepath = './bili/cache'
 def step0():
     BUtils.addwebuser()
 
-step0()
+# step0()
 
 
 @retry(retry_on_exception=MyUtils.retry)
@@ -76,10 +73,12 @@ def main():
     vlist = []
     # 准备工作 - 检查为空，添加下载列表
     def step1():
+        def checkempty():
+            if not [] == MyUtils.listdir(cachepath):
+                pyperclip.copy(MyUtils.standarlizedPath(cachepath))
+                MyUtils.Exit('cache不为空。')
         checkempty()
-        c=UserSpectrum.get()
-        print(c)
-        user = c[0]
+        user=UserSpectrum.get()[0]
         useruid = MyUtils.key(user)
         res = detect(useruid)
 
@@ -93,7 +92,7 @@ def main():
     # 使用下载器下载
     def step2():
         pyautogui.hotkey('alt', 'tab')
-        download(vlist)
+        download()
         pyautogui.hotkey('alt', 'tab')
 
     # 等待下载完毕后转移文件
@@ -106,8 +105,8 @@ def main():
             title, author = MyUtils.cuttail(j, '-')
             MyUtils.move(i, f'./bili/{author}_{useruid}/{title}_{bvid}')
 
-    step1()
-    # step2()
+    # step1()
+    step2()
     # step3()
 
 

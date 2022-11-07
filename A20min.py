@@ -10,7 +10,7 @@ import MyUtils
 def next(t):
     while not MyUtils.now().minute in [0, 20, 40, 60]:
         time.sleep(59)
-    MyUtils.WARN()
+    MyUtils.WARN(f'请前往记录。<A20min>')
     ret = '\n' + MyUtils.realtime()[:-3]
     t.add(ret)
     time.sleep(59 * 2)

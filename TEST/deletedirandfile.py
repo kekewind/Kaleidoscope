@@ -1,3 +1,5 @@
+import os.path
+
 import MyUtils
 
-MyUtils.deletedirandfile([MyUtils.desktoppath('a_backup.txt')], silent=True)
+MyUtils.deletedirandfile(MyUtils.desktoppath('2796.txt'))
