@@ -1004,6 +1004,10 @@ def scrshot(l):
 
 # 文件读写
 # region
+# 返回文件夹和文件
+def listall(path):
+    return extend(listfile(path),listdir(path))
+
 # 判断是否是空的文件夹
 def isemptydir(path):
     path=standarlizedPath(path)

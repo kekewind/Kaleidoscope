@@ -19,4 +19,4 @@ def main(start, *a, **b):
 
 
 if __name__ == "__main__":
-    win32api.MessageBox(None,'SAMPLE','title?',win32con.MB_OK)
+    print('what?什么？')

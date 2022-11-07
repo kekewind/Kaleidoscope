@@ -62,7 +62,14 @@ def count():
     MyUtils.log(f"作者总数：{allusers.length()}")
     MyUtils.log(f"失败总数：{missing.length()}")
     # pyperclip.copy(f'{allpieces.length()}\n{allusers.length()}\n{missing.length()}')
-    for i in MyUtils.listdir()
+    file=0
+    dir=0
+    for i in MyUtils.listdir('./抖音'):
+        dir+=len(MyUtils.listdir(i))
+        file+=len(MyUtils.listfile(i))
+    MyUtils.log(f"视频总数：{file}")
+    MyUtils.log(f"图片总数：{dir}")
+
 
 # 统计重复的作品
 def findduplicate():
