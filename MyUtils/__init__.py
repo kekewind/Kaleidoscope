@@ -1340,7 +1340,7 @@ def DesktopPath(s=''):
         s = random.randint(0, 99999)
         s = str(s)
         log(f'桌面新建：{s}')
-    return standarlizedPath(txt('D:/Kaleidoscope/Desktoppath.txt').l[0] + '/' + s)
+    return standarlizedPath(txt(f"C:/Users/{user}/Desktop/{s}"))
 
 
 def desktoppath(s=''):
