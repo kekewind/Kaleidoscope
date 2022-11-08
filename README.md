@@ -1,4 +1,4 @@
-# 由于github长期被傻逼般的封禁，所有更新已经转移到gitee。附上链接https://gitee.com/v000666_0/Kaleidoscope
+# 由于github长期被傻逼般的封禁，已在gitee同时进行更新。附上链接https://gitee.com/v000666_0/Kaleidoscope
 # Kaleidoscope
 
 Python Selenium 有颜色的爬虫
