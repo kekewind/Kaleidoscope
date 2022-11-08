@@ -699,6 +699,10 @@ class Edge():
     def __init__(self, url='', silent=None):
         self.driver = edge(url=url, silent=silent)
 
+    # 返回窗口列表
+    def windows(self):
+        return self.driver.window_handles
+
     def refresh(self):
         self.driver.refresh()
 
@@ -810,7 +814,9 @@ class Edge():
     def look(self,a=None):
         path = f'D:/Kaleidoscope/error/current.png'
         if not a==None:
-            return self.screenshot(path,a)
+            self.screenshot(path,a)
+            look(path)
+            return
         deletedirandfile([path])
         self.driver.get_screenshot_as_file(path)
         look(path)
