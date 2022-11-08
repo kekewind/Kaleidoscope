@@ -43,7 +43,7 @@ def GetM3U8andInfo():
     #         break
     MyUtils.CreatePath(f'./影视/{name}')
     # 如果存在m3u8直接退出
-    if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
+    if os.path.exists(f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt'):
         return
     # 点击当前EP按钮，多点几次
     MyUtils.clickelement([page, By.XPATH, f'/html/body/div[2]/div[1]/div[2]/div/div/div[2]/ul/li[{CurrentEP}]'])
@@ -55,13 +55,13 @@ def GetM3U8andInfo():
         MyUtils.clickelement([page, By.XPATH, '/html/body/div/div/div/img'])
     # 再检查一次m3u8，如果此时手动下载了，直接退出
     time.sleep(5)
-    if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
+    if os.path.exists(f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt'):
         return
     time.sleep(0)
     pyautogui.hotkey('alt', 'g')
     time.sleep(2)
     # 如果存在m3u8直接退出
-    if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
+    if os.path.exists(f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt'):
         return
     # 判断，多集需要点下一个m3u8
     global step
@@ -84,14 +84,14 @@ def GetM3U8andInfo():
     MyUtils.clickelement([page, By.XPATH, '/html/body/div/button[1]'])
     time.sleep(5)
     time.sleep(3)
-    if os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
+    if os.path.exists(f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt'):
         return
     page.quit()
     GetM3U8andInfo()
 
 
 def Download():
-    Sections = MyUtils.txt('r', 'C:/Users/17371/Downloads/m3u8.txt').l
+    Sections = MyUtils.txt('r', f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt').l
     MyUtils.delog('开始下载')
     inc = 0
     e = MyUtils.pool(30)
@@ -167,7 +167,7 @@ def Combine():
 def Remove():
     global path
     # 去除m3u8
-    os.remove('C:/Users/17371/Downloads/m3u8.txt')
+    os.remove(f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt')
     # 去除clip里的
     for root, dirs, files in os.walk(f'{path}/clip'):
         for file in files:
@@ -194,7 +194,7 @@ def main():
         while CurrentEP <= TotalEP:
             MyUtils.CreatePath(path)
             GetM3U8andInfo()  # 获取TotalUrl,M3U8,名字
-            while not os.path.exists('C:/Users/17371/Downloads/m3u8.txt'):
+            while not os.path.exists(f'C:/Users/{MyUtils.user}/Downloads/m3u8.txt'):
                 GetM3U8andInfo()  # 获取TotalUrl,M3U8,名字
             Download()
             MyUtils.delog(-1)

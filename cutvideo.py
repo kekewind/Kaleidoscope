@@ -8,7 +8,7 @@ from retrying import retry
 
 @retry(retry_on_exception=MyUtils.retry)
 def fun():
-    MyUtils.cutvideo('C:/Users/17371/Pictures/WallPaper/dynamic/WP2.mp4', MyUtils.desktoppath('11.mp4'), '00:00:00', '00:03:20')
+    MyUtils.cutvideo(f'C:/Users/{MyUtils.user}/Pictures/WallPaper/dynamic/WP2.mp4', MyUtils.desktoppath('11.mp4'), '00:00:00', '00:03:20')
 
 
 def main():

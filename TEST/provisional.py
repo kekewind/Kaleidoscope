@@ -10,4 +10,4 @@ import MyUtils
 #     name=path0+f'/{MyUtils.gettail(i,"/")}'
 #     MyUtils.file('wb',name,flis)
 
-path = r"C:\Users\17371\Desktop\地理空间数据库\hw2"
+# path = r"C:\Users\17371\Desktop\地理空间数据库\hw2"

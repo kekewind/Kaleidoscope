@@ -774,7 +774,10 @@ class Edge():
         self.driver.quit()
 
     def __del__(self):
-        self.driver.quit()
+        try:
+            self.driver.quit()
+        except Exception as e:
+            warn(e)
 
     def open(self, url):
         url = 'https://' + url.strip('https://')
@@ -1991,9 +1994,16 @@ def getdiskname():
 
 # endregion
 
-# __init__()
+# __init__() ['
+#    :       pass
 # region
 debug = True
+# 获取计算机用户名
+# region
+for i in listdir('C:/Users/'):
+    if not i in ['C:/Users/Public','C:/Users/Default User','C:/Users/Default','C:/Users/All Users']:
+        user=tail(i,'/')
+# endregion
 headers = {
     'user-agent': \
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
