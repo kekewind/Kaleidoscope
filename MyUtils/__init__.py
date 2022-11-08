@@ -859,10 +859,20 @@ def click(x, y, button='left'):
         console(f'{x}   {y}')
     except Exception as e:
         if type(e) in [pyautogui.FailSafeException]:
-            warn(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
+            Exit(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
         warn(e)
         sys.exit(-1)
 
+# 右击屏幕
+def rclick(x,y):
+    try:
+        pyautogui.rightClick(x, y)
+        console(f'{x}   {y}')
+    except Exception as e:
+        if type(e) in [pyautogui.FailSafeException]:
+            Exit(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
+        warn(e)
+        sys.exit(-1)
 
 # 点击元素
 def clickelement(l):
@@ -1016,6 +1026,14 @@ def scrshot(l):
 
 # 文件读写
 # region
+# 返回项目源代码根目录
+def projectpath(s=''):
+    return f'D:/Kaleidoscope/{s}'
+
+# 返回项目临时文件根目录
+def cachepath(s=''):
+    return f'{projectpath("cache/"+s)}'
+
 # 返回文件夹和文件b
 def listall(path):
     return extend(listfile(path),listdir(path))
@@ -2010,9 +2028,9 @@ headers = {
     'cookie': \
         'douyin.com; __ac_referer=__ac_blank; ttcid=431befd8b5104ec2b3e9935bc6ec52f617; s_v_web_id=verify_l17s6pii_nh6oZDhq_iYxA_4ytu_ANgk_OTyTTCcg2xKS; douyin.com; csrf_session_id=6773d2a77c2678be09d4643511e64a6b; passport_csrf_token=ec7dfe616ded3178be26b33769703ec3; passport_csrf_token_default=ec7dfe616ded3178be26b33769703ec3; live_can_add_dy_2_desktop=%221%22; download_guide=%223%2F20220806%22; THEME_STAY_TIME=%22299980%22; IS_HIDE_THEME_CHANGE=%221%22; __ac_nonce=062f0b4060092bc3a4977; __ac_signature=_02B4Z6wo00f01hCbMoQAAIDCkJnIxJqXz.oQuzYAAObkIAmDFqT5eYtXQLOIndt3rqBiTrG-CP3fU3NbcCEhFtr9r1pPKbWfEluNFR83rgs19EQFlu6MM54rVDDiMOkZpWeEUrxin.D9jwp.fd; strategyABtestKey=1659941895.313; home_can_add_dy_2_desktop=%221%22; tt_scid=g3OvOz0oZqKoRGifS-F3fVy9Uku8K1fcPIo.H58wX9ckfCVHoYw0ftRBmQUwpdW28229; msToken=DyrYcuwheFZCpvBdU_rl7x872ZpxcFUjmoUmnVSUjv5iH-OY4kfwy6vn4VvEVHnixrP6nJw59CWQmCznZwzJJI1-Ux37b8ACpJ7F4-8Jb8J4vxHPP-rGW6yTQZs=; msToken=wiua9ZhBny4jw_muW9lEdGu6MpWNaAGgpTSDW6NqhoScfcwHrJ-0onvVi7sOuh5o9bR19EbBW8BBTEhVpGsEsbKCYGmYIL6zJJglE8Gr4FBqa2PREXaSkNNgwv8=' \
     }
-root = standarlizedPath(__file__)
-root = root[:root.rfind('/')]
-root = root[:root.rfind('/')] + '/'
+runningroot = standarlizedPath(__file__)
+runningroot = runningroot[:runningroot.rfind('/')]
+runningroot = runningroot[:runningroot.rfind('/')] + '/'
 Logcount = 0
 activedisk = txt('D:/Kaleidoscope/ActiveDisk.txt')
 disknames = RefreshTXT("D:/Kaleidoscope/disknames.txt")
