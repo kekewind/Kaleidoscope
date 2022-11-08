@@ -15,8 +15,10 @@ import MyUtils
 
 def main(start, *a, **b):
     path = './知乎'
-    print(MyUtils.accesstime(path).s())
 
 
 if __name__ == "__main__":
-    print('what?什么？')
+
+    c=('\U0001f62d')
+    MyUtils.out([c])
+    print(c)

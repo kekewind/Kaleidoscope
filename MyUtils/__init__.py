@@ -24,7 +24,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
+# sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
 
@@ -806,8 +806,11 @@ class Edge():
             pyperclip.copy('D:/Kaleidoscope/error')
             Exit(-1)
 
-    def look(self):
+    # 查看当前页面
+    def look(self,a=None):
         path = f'D:/Kaleidoscope/error/current.png'
+        if not a==None:
+            return self.screenshot(path,a)
         deletedirandfile([path])
         self.driver.get_screenshot_as_file(path)
         look(path)
@@ -1004,7 +1007,7 @@ def scrshot(l):
 
 # 文件读写
 # region
-# 返回文件夹和文件
+# 返回文件夹和文件b
 def listall(path):
     return extend(listfile(path),listdir(path))
 

@@ -15,9 +15,10 @@ time.sleep(2)
 
 while True:
     # 获取标题，转到回答页面
-    answerurl = page.element(['/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/h2/div/a', \
-                              '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/div[2]/span/div', \
-                              '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/h2/span/a'])
+    answerurl = page.element(['/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/h2/div/a',
+                              '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/div[2]/span/div',
+                              '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/h2/span/a',
+                              '//*[@id="root"]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/div[2]/span/div'])
     title = answerurl.text
     # answerurl = answerurl.get_attribute('href')
     # page.get(answerurl)
