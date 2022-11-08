@@ -4,8 +4,8 @@ import MyUtils
 
 
 def fun():
-    page = MyUtils.Chrome('https://www.baidu.com', silent=True)
-    MyUtils.sleep()
+    page = MyUtils.Chrome('https://www.baidu.com', silent=False)
+    MyUtils.sleep(10)
 
 
 def main():

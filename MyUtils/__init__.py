@@ -678,7 +678,7 @@ def chrome(url='', mine=None, silent=None, t=100):
         options.add_argument('--start-maxmized')
         if not mine == None:
             time.sleep(3)
-            options.add_argument(f"--user-data-dir=C:\\Users\\17371\\AppData\\Local\\Google\\Chrome\\User Data")
+            options.add_argument(f"--user-data-dir=C:\\Users\\{user}\\AppData\\Local\\Google\\Chrome\\User Data")
             options.add_experimental_option("excludeSwitches", ['enable-automation'])
         if not silent in [None, False]:
             options.add_argument('headless')
