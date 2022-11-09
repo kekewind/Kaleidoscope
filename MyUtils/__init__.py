@@ -349,7 +349,7 @@ def retry(e):
 # region
 # 打开文件
 def look(path):
-    if not isfile(path):
+    if not isfile(path) and not 'https' in path:
         warn(f'不存在文件{path}')
         return
     os.startfile(path)
@@ -785,7 +785,8 @@ class Edge():
         Edge.switchto(self, )
 
     def get(self, url):
-        url = 'https://' + url.strip('https://')
+        if not'https://'in url:
+            url='https://'+url
         self.driver.get(url)
 
     def switchto(self, n=-1):
@@ -824,6 +825,8 @@ class Edge():
         self.driver.get_screenshot_as_file(path)
         look(path)
 
+    def close(self):
+        self.driver.close()
 
 class Chrome(Edge):
     def __init__(self, url='', mine=None, silent=None, t=100):
@@ -1692,7 +1695,7 @@ class cache():
             try:
                 f = txt(self.path)
                 if f.l == []:
-                    return None
+                    return []
                 s = jsontodict(f.l[0])
                 f.l.pop(0)
                 f.save('cache get')
@@ -1893,7 +1896,7 @@ class MyError(BaseException):
 def jsontodict(s):
     if type(s) == dict:
         return s
-    if s == '' or s == None:
+    if s == '' or s == None or s==[]:
         warn(f'{s, type(s)}')
         return
     try:
@@ -2017,11 +2020,7 @@ def getdiskname():
 # region
 debug = True
 # 获取计算机用户名
-# region
-for i in listdir('C:/Users/'):
-    if not i in ['C:/Users/Public','C:/Users/Default User','C:/Users/Default','C:/Users/All Users']:
-        user=tail(i,'/')
-# endregion
+user=txt(projectpath('user.txt')).l[0]
 headers = {
     'user-agent': \
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
