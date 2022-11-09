@@ -20,5 +20,7 @@ def main(start, *a, **b):
 if __name__ == "__main__":
 
     c=('\U0001f62d')
-    MyUtils.out([c])
     print(c)
+    print(sys.getsizeof('a'))
+    print(sys.getsizeof(' '))
+    print(MyUtils.size(''))

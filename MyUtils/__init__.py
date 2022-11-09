@@ -24,6 +24,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+
+from moviepy.editor import VideoFileClip
 # sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
@@ -361,13 +363,28 @@ def WARN(s):
     now=Time()
     win32api.MessageBox(None,s,f'Kaleidoscope{now.time()}',win32con.MB_OK)
 
+# 返回bit
 def size(a, sum=0):
     if type(a) in [str]:
-        if standarlizedPath(a).find('/') > 1:
-            if os.path.exists(a):
-                stat_info = os.stat(a)
+        s=a
+        # 磁盘
+        if len(s)==1:
+            gb = 1024 ** 3  # GB == gigabyte
+            try:
+                total_b, used_b, free_b = shutil.disk_usage(s.strip('\n') + ':')  # 查看磁盘的使用情况
+            except Exception as e:
+                Exit(e)
+            return (free_b / gb)
+        #     文件（夹）
+        if isfile(s) or isdir(s):
+            s = standarlizedPath(s)
+            if os.path.exists(s):
+                stat_info = os.stat(s)
+                # Bit -> MB
                 return stat_info.st_size / 1024 / 1024
-    if type(a) in [list, tuple]:
+    #     其它类型
+
+    elif type(a) in [list, tuple]:
         for i in a:
             sum = size(i, sum)
         return sum
@@ -376,8 +393,7 @@ def size(a, sum=0):
         for k in keys(a):
             sum = size(a[k], sum)
         return sum
-    else:
-        return sum + sys.getsizeof(a)
+    return sum + sys.getsizeof(a)
 
 
 def Input(x, y, s):
@@ -430,11 +446,22 @@ def extractaudio(inputpath,outputpath):
     print(command)
     os.system('"%s"' % command)
 
+# 返回音频的秒数
+def videolength(s):
+    if not isfile(s):
+        Exit(s)
+    return VideoFileClip(s).duration
+
 def info(s):
-    # 磁盘空间、文件（夹）信息、变量大小和类型
-    if type(s) in [int, ]:
-        warn(f'用法错误。传入参数为{type(s)}类型')
-        return
+    # 如果是类，列举属性和方法
+    if not type(s)in [int,str,list,dict,float,tuple,]:
+        att=[]
+        for i in dir(s):
+            if not i in dir(object):
+                att.append(i)
+        log(f'属性和方法：{att}')
+        return att
+
     if type(s) in [str]:
         # 磁盘
         if len(s) == 1:
@@ -451,36 +478,26 @@ def info(s):
         #     文件（夹）
         if isfile(s) or isdir(s):
             s = standarlizedPath(s)
+            sss=''
             if isdir(s):
                 sss = '夹'
             log(f'路径：{s}（文件{sss}）')
-            # log(f'创建日期：{createtime(s)}')
-            # log(f'修改日期：{modifiedtime(s)}')
+            log(f'创建日期：{createtime(s)}')
+            log(f'修改日期：{modifytime(s)}')
             log(f'访问日期：{accesstime(s)}')
-            log(f'大小：{size(s)}')
-            log(f'')
-    if type(s) in [list]:
+            log(f'大小：{size(s)}MB')
+
+            # 是视频
+            if tail(s,'.')in['wmv','mp4']:
+                t=videolength(s)
+                log(f'{filename(s)} 时长{int(t/60)}:{t-int(t/60)}')
+            return size(s)
+    # 其它类型
+    elif type(s) in [list,tuple,dict]:
         tip(f'{s[0:2]}...{s[-1]}')
         tip(f'类型：{type(s)} 大小：{int(int(sys.getsizeof(s) / 1024 / 1024 * 100) / 100.0)}MB 内存地址：{id(s)} 长度{len(list(s))}')
-        return
-
-    # 文件
-    if type(s) != str or type(s) == str and os.path.exists(s[:224]):
-        try:
-            tip(f'类型：{type(s)} 大小：{int(int(sys.getsizeof(s) / 1024 / 1024 * 100) / 100.0)}MB 内存地址：{id(s)} 长度{len(list(s))}')
-        except Exception as e:
-            warn(e)
-            tip(f'类型：{type(s)} 大小：{int(int(sys.getsizeof(s) / 1024 / 1024 * 100) / 100.0)}MB 内存地址：{id(s)}')
-            return '用法错误。可能是调用了print(provisional.info)导致的。'
-        return
-    s = str(s)
-    if s == '':
-        warn(f'用法错误。s或许应为字符串而不是s={s}')
-    path = standarlizedPath(s)
-    if os.path.exists(path):
-        if not path.rfind('.') > 1:
-            ()
-
+    elif type(s)in [int,str,float,]:
+        tip(f'类型：{type(s)} 大小：{int(sys.getsizeof(s))}Byte 内存地址：{id(s)}')
 
 # endregion
 

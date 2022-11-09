@@ -16,7 +16,7 @@ time.sleep(2)
 
 while True:
     # 获取标题
-    answerurl = page.element(['//*[@id="root"]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/h2',# 回答的标题
+    answerurl = page.element(['//*[@id="root"]//main//*[@class="ContentItem-title"]',# 回答的标题
                               ])
     title = answerurl.text
     # 点击标题产生新窗口
@@ -25,7 +25,7 @@ while True:
         page.switchto(-1)
     time.sleep(2)
     # 新窗口
-    Answer = page.element(['/html/body/div[1]/div/main/div/div/div[3]/div[1]/div/div[2]/div/div/div', # 第一个回答
+    Answer = page.element(['//*[@id="root"]//main//div[@class="QuestionAnswer-content"]//div[@class="ContentItem AnswerItem"]',
                            '/html/body/div[1]/div/main/div/article', # 文章，全屏
                            '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/div[2]/span[1]/div',
                            '/html/body/div[1]/div/main/div/div[1]/div[2]/div[2]/div[1]/div[1]/div/div/div/div[2]/div[2]/button[1]',
@@ -48,8 +48,8 @@ while True:
 
     # 回答里的图片保存
     piccount = 0
-    pics = page.elements(['/html/body/div[1]/div/main/div/div/div[3]/div[1]/div/div[2]/div/div/div/div[2]/span[1]/div/span/figure/div/img',
-                          '/html/body/div[1]/div/main/div/article/div[1]/div/div/figure/div/img'])
+    pics = page.elements(['//*[@id="root"]//main//div[@class="RichContent-inner"]//figure//img'
+                          ])
     for pic in pics:
         url = pic.get_attribute('data-actualsrc')
         piccount += 1
