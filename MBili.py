@@ -117,14 +117,16 @@ def countdownloaded():
 
 
 def countrecord():
-    (videospectrum.length())
+    MyUtils.log(f'记录总数：{videospectrum.length()}')
 
+def count():
+    countrecord()
+    countdownloaded()
 
 if __name__ == '__main__':
-    # countdownloaded()
-    # countrecord()
+    # count()
     # adduser()
     # checkweb()
     # delete()
     # checkisindisk()
-    makerecord()
+    # makerecord()

@@ -3,6 +3,7 @@ import datetime
 import inspect
 import json
 import os
+import multiprocessing
 import random
 import re
 import shutil
@@ -876,7 +877,7 @@ def edge(url='', silent=None):
 def click(x, y, button='left'):
     try:
         pyautogui.click(x, y, button=button)
-        console(f'{x}   {y}')
+        print(f'{x}   {y}')
     except Exception as e:
         if type(e) in [pyautogui.FailSafeException]:
             Exit(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
@@ -887,7 +888,7 @@ def click(x, y, button='left'):
 def rclick(x,y):
     try:
         pyautogui.rightClick(x, y)
-        console(f'{x}   {y}')
+        print(f'{x}   {y}')
     except Exception as e:
         if type(e) in [pyautogui.FailSafeException]:
             Exit(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
@@ -1756,14 +1757,16 @@ def alert(s=''):
     p.execute(do, )
 
 def console(s,duration=999,text_color='#F08080',font=('Hack',14),size=28):
-    # 更新控制台
+    #  每当新的控制台启动后，改内容，然后开新进程，将0改为1，1改为0
+    # 控制台每隔一段时间刷新，如果变为0则退出。
+    # 新的控制台计时结束后，将1改为0
+    refreshtime=0.6
     consoletxt.add({nowstr():s})
     while 3600<Now().counttime(Time(key(jsontodict(consoletxt.get())))):
         consoletxt.l.pop(0)
     consoletxt.save()
-
     #短暂显示桌面控制台
-    def display():
+    def show():
         # 系统默认颜色
         # COLOR_SYSTEM_DEFAULT='1234567890'=='ADD123'
         global win
@@ -1780,14 +1783,23 @@ def console(s,duration=999,text_color='#F08080',font=('Hack',14),size=28):
         event, values = win.read(timeout=0)
         time.sleep(0.3)
         return win
-    shown=txt('D:/Kaleidoscope/ConsoleShow.txt')
-    shown.l=['1']
-    shown.save()
-    # 反复刷新控制台
-    while shown.l[0]=='1':
-        shown=txt('D:/Kaleidoscope/ConsoleShow.txt')
-        display()
-
+    def func(duration,):
+        delog('1')
+        return
+        # 更改consolerunning
+        if consolerunning.l[0] == '1':
+            consolerunning.l[0] == '0'
+            consolerunning.save()
+        elif consolerunning.l[0] == '0':
+            consolerunning.l[0] == '1'
+            consolerunning.save()
+        while duration > 0:
+            time.sleep(refreshtime)
+            duration -= refreshtime
+            show()
+    process=multiprocessing.Process(target=func,args=(duration,))
+    # process.daemon=True
+    process.start()
 
 def Log(s, x1, x2, x3=7, x4=30, x5=30):
     s = str(s)
@@ -2051,6 +2063,7 @@ Logcount = 0
 activedisk = txt('D:/Kaleidoscope/ActiveDisk.txt')
 disknames = RefreshTXT("D:/Kaleidoscope/disknames.txt")
 consoletxt = Json('D:/Kaleidoscope/console.txt')
+consolerunning = txt(projectpath('ConsoleShow.txt'))
 setRootPath()
 diskinfo = RefreshJson('./diskInfo.txt')
 diskname = getdiskname()
