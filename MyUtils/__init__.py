@@ -376,13 +376,19 @@ def size(a, sum=0):
             except Exception as e:
                 Exit(e)
             return (free_b / gb)
-        #     文件（夹）
-        if isfile(s) or isdir(s):
-            s = standarlizedPath(s)
-            if os.path.exists(s):
-                stat_info = os.stat(s)
-                # Bit -> MB
-                return stat_info.st_size / 1024 / 1024
+        #     文件
+        if isfile(s):
+            return os.stat(s).st_size/1024/1024
+
+    #     文件夹
+        if isdir(s):
+            sum=0
+            for i in listfile(s):
+                sum+=size(i)
+            for i in listdir(s):
+                sum+=size(i)
+            return sum
+        
     #     其它类型
 
     elif type(a) in [list, tuple]:
