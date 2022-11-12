@@ -1154,9 +1154,8 @@ def out(s):
     f = txt(projectpath('out.txt'))
     f.l=[]
     f.save()
-    @listed
     def do(s):
-        f.add('\n' + s)
+        f.add(s)
 
     do(s)
     Open(f.path)
@@ -1474,8 +1473,12 @@ class txt():
         i = str(i)
         for k in i.split('\n'):
             k = str(k)
+                # 如果原来是空的，就不另起一行
+            if not self.l==[]:
+                file('a', self.path, ['\n' + k], encoding='utf-8')
+            else:
+                file('a', self.path, [k], encoding='utf-8')
             self.l.append(str(k))
-            file('a', self.path, ['\n' + k], encoding='utf-8')
             delog(f'txt add {k}')
 
     def addline(selfself, i):
