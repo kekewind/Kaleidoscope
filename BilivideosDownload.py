@@ -8,7 +8,7 @@ import BUtils
 import MyUtils
 import pyperclip
 
-MAX = 12
+MAX = 7
 count = 0
 
 
@@ -26,6 +26,7 @@ def detect(UserUID):
 def download():
     c=readytodownload.get()
     vlist=MyUtils.value(c)
+    vlist=vlist[:MAX]
     for bvid in vlist:
         if BUtils.skipdownloaded(bvid):
             continue
@@ -48,12 +49,6 @@ def download():
         time.sleep(0.7)
         MyUtils.click(1246, 722)
         time.sleep(0.7)
-
-        # count += 1
-        # if count > MAX:
-        #     UserSpectrum.rollback()
-        #     MyUtils.warn(f'达到最大下载个数{MAX}')
-        #     sys.exit(-1)
 
 
 page = 1
