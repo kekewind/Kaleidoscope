@@ -30,7 +30,6 @@ from moviepy.editor import VideoFileClip
 # sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
-
 # region
 # 复制代码块
 # 列表传参法是可行的，只不过最好不要传不是自定义的类
@@ -1138,6 +1137,7 @@ def copydir(s1, s2):
 # 复制文件
 def copyfile(s1, s2):
     s1, s2 = standarlizedPath(s1), standarlizedPath(s2)
+    createpath(s2)
     if isfile(s1):
         shutil.copy(s1, s2)
 
@@ -1385,7 +1385,8 @@ def DesktopPath(s=''):
         s = random.randint(0, 99999)
         s = str(s)
         log(f'桌面新建：{s}')
-    return standarlizedPath(txt(f"C:/Users/{user}/Desktop/{s}"))
+        return standarlizedPath(f"C:/Users/{user}/Desktop/{s}.txt")
+    return standarlizedPath(f"C:/Users/{user}/Desktop/{s}")
 
 
 def desktoppath(s=''):
