@@ -115,8 +115,8 @@ def main():
             title, author = MyUtils.cuttail(j, '-')
             MyUtils.move(i, f'./bili/{author}_{useruid}/{title}_{bvid}')
 
-    # step1()
-    # step2()
+    step1()
+    step2()
     # 等待下载完毕
     big=0
     while True:
@@ -125,7 +125,7 @@ def main():
         if newbig==big:
             break
         big=newbig
-        # time.sleep(20)
+        time.sleep(20)
     step3()
 
 if __name__ == '__main__':
