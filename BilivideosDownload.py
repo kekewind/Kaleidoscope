@@ -12,8 +12,6 @@ MAX = 7
 count = 0
 
 
-
-
 def detect(UserUID):
     res = BUtils.hostjson(UserUID, page)
     while res == None:
@@ -23,32 +21,6 @@ def detect(UserUID):
     return res.json()
 
 
-def download():
-    c=readytodownload.get()
-    vlist=MyUtils.value(c)
-    vlist=vlist[:MAX]
-    for bvid in vlist:
-        if BUtils.skipdownloaded(bvid):
-            continue
-        pyperclip.copy(f'https://www.bilibili.com/video/{bvid}')
-        MyUtils.click(1449, 214)
-        time.sleep(0.7)
-        MyUtils.click(988, 500)
-        time.sleep(1)
-        pyautogui.hotkey('ctrl', 'v')
-        time.sleep(0.7)
-        pyautogui.hotkey('enter')
-        time.sleep(5)
-
-        MyUtils.click(708, 504)
-        time.sleep(0.7)
-        MyUtils.click(1208, 576)
-        time.sleep(0.7)
-        # 可能有8k 4k 1080p60 1080p 720 480 320 七种清晰度，导致有三行，同时出现多P
-        MyUtils.click(1208, 606)
-        time.sleep(0.7)
-        MyUtils.click(1246, 722)
-        time.sleep(0.7)
 
 
 page = 1
@@ -69,7 +41,11 @@ def step0():
 
 @retry(retry_on_exception=MyUtils.retry)
 def main():
+    # 变量
+    author=''
     vlist = []
+    useruid = MyUtils.key(UserSpectrum.get()[0])
+    author=BUtils.uidtoid(useruid)
     # 准备工作 - 检查为空，添加下载列表
     def step1():
         def checkempty():
@@ -77,8 +53,6 @@ def main():
                 pyperclip.copy(MyUtils.standarlizedPath(cachepath))
                 MyUtils.Exit('cache不为空。')
         checkempty()
-        user=UserSpectrum.get()[0]
-        useruid = MyUtils.key(user)
         res = detect(useruid)
 
         # 获取json中的量
@@ -91,11 +65,49 @@ def main():
     def step2():
         pyautogui.hotkey('alt', 'tab')
         time.sleep(0.3)
+        def download():
+            c = readytodownload.get()
+            vlist = MyUtils.value(c)
+            vlist = vlist[:MAX]
+            print(vlist)
+            for bvid in vlist:
+                if BUtils.skipdownloaded(bvid):
+                    continue
+                pyperclip.copy(f'https://www.bilibili.com/video/{bvid}')
+                MyUtils.click(1449, 214)
+                time.sleep(0.7)
+                MyUtils.click(988, 500)
+                time.sleep(1)
+                pyautogui.hotkey('ctrl', 'v')
+                time.sleep(0.7)
+                pyautogui.hotkey('enter')
+                time.sleep(5)
+
+                MyUtils.click(708, 504)
+                time.sleep(0.7)
+                MyUtils.click(1208, 576)
+                time.sleep(0.7)
+                # 可能有8k 4k 1080p60 1080p 720 480 320 七种清晰度，导致有三行，同时出现多P
+                MyUtils.click(1208, 606)
+                time.sleep(0.7)
+                MyUtils.log(f'{author} {bvid}已加入下载器')
+                MyUtils.click(1246, 722)
+                time.sleep(0.7)
         download()
         pyautogui.hotkey('alt', 'tab')
 
     # 等待下载完毕后转移文件
     def step3():
+        # 等待下载完毕
+        big=0
+        while True:
+            newbig=MyUtils.size('./bili/cache')
+            print(newbig)
+            if newbig==big:
+                break
+            big=newbig
+            time.sleep(20)
+
         useruid=MyUtils.key(MyUtils.jsontodict(readytodownload.get()))
         # useruid='4441160'
         for i in MyUtils.listdir('./bili/cache'):
@@ -115,15 +127,6 @@ def main():
 
     step1()
     step2()
-    # 等待下载完毕
-    big=0
-    while True:
-        newbig=MyUtils.size('./bili/cache')
-        print(newbig)
-        if newbig==big:
-            break
-        big=newbig
-        time.sleep(20)
     step3()
 
 if __name__ == '__main__':

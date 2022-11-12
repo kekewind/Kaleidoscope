@@ -933,10 +933,11 @@ def edge(url='', silent=None):
 
 
 # 点击屏幕
-def click(x, y, button='left'):
+def click(x, y, button='left',silent=True):
     try:
         pyautogui.click(x, y, button=button)
-        print(f'{x}   {y}')
+        if not silent:
+            print(f'{x}   {y}')
     except Exception as e:
         if type(e) in [pyautogui.FailSafeException]:
             Exit(f'可能是选取点击的坐标过于极端。 x:{x}    y:{y}')
@@ -1637,6 +1638,7 @@ class RefreshJson(Json, RefreshTXT):
 
     # depatch
     # segment
+    # 有时会产生异常，多行没有换行。分开。
     def depart(self):
         addl = []
         dell = []
@@ -1651,6 +1653,19 @@ class RefreshJson(Json, RefreshTXT):
             RefreshTXT.add(self, '{' + j + '}')
         for i in dell:
             RefreshTXT.delete(self, i)
+
+    # 返回列表，所有的record，一个value对应一个key
+    def all(self):
+        ret=[]
+        for i in range(self.length()):
+            extend(ret,self.get())
+        return ret
+
+    # 返回值的键
+    def find(self,v):
+        for i in self.all():
+            if v == value(i):
+                return key(i)
 
     def get(self):
         dstr = (RefreshTXT.get(self))

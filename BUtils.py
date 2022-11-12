@@ -82,22 +82,27 @@ def filenametonum(s):
         sys.exit(-1)
     return s[s.rfind('_') + 1:]
 
-
-def idtouid(UID):
-    # 根据数字返回名字
+# upid号转换为up名称，并且记录
+def uidtoid(UID):
     url = (f'https://api.bilibili.com/x/space/arc/search?mid={UID}&ps=30&tid=0&pn={1}&keyword=&order=pubdate&jsonp=jsonp')
     res = requests.get(url, headers=MyUtils.headers)
-    # print(f"[upid] {res.json()['data']}")
+    # 这个就是第一个作者author
     # print(f"[upid] {res.json()['data']['list']['vlist'][0]['author']}")
+    # 由于存在可能有合作，多个author，因此要遍历
     try:
         for i in res.json()['data']['list']['vlist']:
-            if not i['mid'] == UID:
+            if not i['mid'] == int(UID):
                 continue
-            return MyUtils.MyName(i['author'])
+            return MyUtils.standarlizedFileName(i['author'])
     except:
-        print(f"[upid] error when trying mid(UID)={UID}")
-        return None
+        MyUtils.Exit(f"[upid] error when trying mid(UID)={UID}")
 
+
+# 通过up名称从记录中获取up uid
+def idtouid(id):
+    return videouserspectrum.find(id)
 
 def skipdownloaded(bvid):
     return str(bvid) in MyUtils.keys(videouserspectrum.d)
+
+print(idtouid('雨波波s'))
