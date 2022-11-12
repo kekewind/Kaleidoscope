@@ -1,5 +1,4 @@
 import os
 
 import MyUtils
-cmd=MyUtils.CMD()
-cmd.run('ls')
+MyUtils.CMD(f'cd d:;cd {MyUtils.projectpath()};git push',silent=True)

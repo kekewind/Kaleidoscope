@@ -353,8 +353,8 @@ def retry(e):
 # region
 # 命令行
 # https://blog.csdn.net/weixin_42133116/article/details/114371614
-class CMD:
-    def __init__(self, coding='utf-8', ):
+class CMD():
+    def __init__(self,cmds='',coding='utf-8', silent=False):
         cmd = [self._where('PowerShell.exe'),
                "-NoLogo", "-NonInteractive",  # Do not print headers
                "-Command", "-"]  # Listen commands from stdin
@@ -362,6 +362,7 @@ class CMD:
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         self.popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT, startupinfo=startupinfo)
         self.coding = coding
+        self.run(cmds,silent=silent)
 
     def __enter__(self):
         return self
@@ -369,7 +370,7 @@ class CMD:
     def __exit__(self, a, b, c):
         self.popen.kill()
 
-    def run(self, cmd, timeout=15):
+    def run(self, cmd, silent=False,timeout=15):
         b_cmd = cmd.encode(encoding=self.coding)
         try:
             b_outs, errs = self.popen.communicate(b_cmd, timeout=timeout)
@@ -378,7 +379,7 @@ class CMD:
             b_outs, errs = self.popen.communicate()
         outs = b_outs.decode(encoding=self.coding)
         if errs==None:
-            out(outs)
+            out(outs,silent=silent)
             return True
         else:
             return False
@@ -1150,7 +1151,7 @@ def modifytime(path):
 
 
 # 新建文件以进行标准输出
-def out(s):
+def out(s,silent=False):
     f = txt(projectpath('out.txt'))
     f.l=[]
     f.save()
@@ -1158,7 +1159,8 @@ def out(s):
         f.add(s)
 
     do(s)
-    Open(f.path)
+    if silent==False:
+        Open(f.path)
 
 
 # 重命名文件
