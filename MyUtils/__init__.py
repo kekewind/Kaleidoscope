@@ -5,6 +5,8 @@ import json
 import os
 import multiprocessing
 import random
+import subprocess
+from glob import glob
 import re
 import shutil
 import sys
@@ -28,7 +30,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from moviepy.editor import VideoFileClip
 # sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
-
 
 
 # region
@@ -350,6 +351,57 @@ def retry(e):
 
 # 特殊功能函数
 # region
+# 命令行
+# https://blog.csdn.net/weixin_42133116/article/details/114371614
+class CMD:
+    def __init__(self, coding='utf-8', ):
+        cmd = [self._where('PowerShell.exe'),
+               "-NoLogo", "-NonInteractive",  # Do not print headers
+               "-Command", "-"]  # Listen commands from stdin
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        self.popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT, startupinfo=startupinfo)
+        self.coding = coding
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, a, b, c):
+        self.popen.kill()
+
+    def run(self, cmd, timeout=15):
+        b_cmd = cmd.encode(encoding=self.coding)
+        try:
+            b_outs, errs = self.popen.communicate(b_cmd, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            self.popen.kill()
+            b_outs, errs = self.popen.communicate()
+        outs = b_outs.decode(encoding=self.coding)
+        if errs==None:
+            out(outs)
+            return True
+        else:
+            return False
+            Exit(errs)
+
+    @staticmethod
+    def _where(filename, dirs=None, env="PATH"):
+        if dirs is None:
+            dirs = []
+        if not isinstance(dirs, list):
+            dirs = [dirs]
+        if glob(filename):
+            return filename
+        paths = [os.curdir] + os.environ[env].split(os.path.pathsep) + dirs
+        try:
+            return next(os.path.normpath(match)
+                        for path in paths
+                        for match in glob(os.path.join(path, filename))
+                        if match)
+        except (StopIteration, RuntimeError):
+            raise IOError("File not found: %s" % filename)
+
+
 # 打开文件
 def look(path):
     if not isfile(path) and not 'https' in path:
@@ -1099,8 +1151,9 @@ def modifytime(path):
 
 # 新建文件以进行标准输出
 def out(s):
-    f = txt('new')
-
+    f = txt(projectpath('out.txt'))
+    f.l=[]
+    f.save()
     @listed
     def do(s):
         f.add('\n' + s)
@@ -1138,6 +1191,7 @@ def copydir(s1, s2):
 # 复制文件
 def copyfile(s1, s2):
     s1, s2 = standarlizedPath(s1), standarlizedPath(s2)
+    createpath(s2)
     if isfile(s1):
         shutil.copy(s1, s2)
 
@@ -1385,7 +1439,8 @@ def DesktopPath(s=''):
         s = random.randint(0, 99999)
         s = str(s)
         log(f'桌面新建：{s}')
-    return standarlizedPath(txt(f"C:/Users/{user}/Desktop/{s}"))
+        return standarlizedPath(f"C:/Users/{user}/Desktop/{s}.txt")
+    return standarlizedPath(f"C:/Users/{user}/Desktop/{s}")
 
 
 def desktoppath(s=''):
