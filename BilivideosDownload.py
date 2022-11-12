@@ -8,8 +8,6 @@ import BUtils
 import MyUtils
 import pyperclip
 
-MAX = 7
-count = 0
 
 
 def detect(UserUID):
@@ -27,9 +25,7 @@ page = 1
 VideoSpectrum = BUtils.videospectrum
 UserSpectrum = BUtils.videouserspectrum
 readytodownload=BUtils.readytodownload
-count = 0
-MAX = 9999
-useruid = ''
+MAX = 7
 cachepath = './bili/cache'
 
 # 添加新的用户

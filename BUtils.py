@@ -104,5 +104,3 @@ def idtouid(id):
 
 def skipdownloaded(bvid):
     return str(bvid) in MyUtils.keys(videouserspectrum.d)
-
-print(idtouid('雨波波s'))
