@@ -1,18 +1,55 @@
-import time
+import os
+from glob import glob
+import subprocess as sp
 
-import PySimpleGUI as sg
 
-def console(message):
-    global win
-    layout = [[sg.Text(message, background_color=bg, pad=(0, 0),\
-                       text_color='grey85',font='vijaya')]]
-    win = sg.Window('title', layout, no_titlebar=True, keep_on_top=True,
-        location=(120*8, 0), auto_close=False, auto_close_duration=999,
-        transparent_color='#add123', margins=(0, 0))
-    event, values = win.read(timeout=0)
-    return win
+class CMD:
+    # https://blog.csdn.net/weixin_42133116/article/details/114371614
+    def __init__(self, coding='utf-8', ):
+        cmd = [self._where('PowerShell.exe'),
+               "-NoLogo", "-NonInteractive",  # Do not print headers
+               "-Command", "-"]  # Listen commands from stdin
+        startupinfo = sp.STARTUPINFO()
+        startupinfo.dwFlags |= sp.STARTF_USESHOWWINDOW
+        self.popen = sp.Popen(cmd, stdout=sp.PIPE, stdin=sp.PIPE, stderr=sp.STDOUT, startupinfo=startupinfo)
+        self.coding = coding
 
-bg = '#add123'
-win = console('Here is the message.')
+    def __enter__(self):
+        return self
 
-time.sleep(10)
+    def __exit__(self, a, b, c):
+        self.popen.kill()
+
+    def run(self, cmd, timeout=15):
+        b_cmd = cmd.encode(encoding=self.coding)
+        try:
+            b_outs, errs = self.popen.communicate(b_cmd, timeout=timeout)
+        except sp.TimeoutExpired:
+            self.popen.kill()
+            b_outs, errs = self.popen.communicate()
+        outs = b_outs.decode(encoding=self.coding)
+        return outs, errs
+
+    @staticmethod
+    def _where(filename, dirs=None, env="PATH"):
+        if dirs is None:
+            dirs = []
+        if not isinstance(dirs, list):
+            dirs = [dirs]
+        if glob(filename):
+            return filename
+        paths = [os.curdir] + os.environ[env].split(os.path.pathsep) + dirs
+        try:
+            return next(os.path.normpath(match)
+                        for path in paths
+                        for match in glob(os.path.join(path, filename))
+                        if match)
+        except (StopIteration, RuntimeError):
+            raise IOError("File not found: %s" % filename)
+
+
+if __name__ == '__main__':
+    with PowerShell() as ps:
+        outs, errs = ps.run('cd d:;ls')
+    print(errs)
+    print(outs)

@@ -43,6 +43,9 @@ def download():
         time.sleep(0.7)
         MyUtils.click(1208, 576)
         time.sleep(0.7)
+        # 可能有8k 4k 1080p60 1080p 720 480 320 七种清晰度，导致有三行，同时出现多P
+        MyUtils.click(1208, 606)
+        time.sleep(0.7)
         MyUtils.click(1246, 722)
         time.sleep(0.7)
 
