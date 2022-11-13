@@ -25,7 +25,7 @@ page = 1
 VideoSpectrum = BUtils.videospectrum
 UserSpectrum = BUtils.videouserspectrum
 readytodownload=BUtils.readytodownload
-MAX = 7
+MAX = 30
 cachepath = './bili/cache'
 
 # 添加新的用户
