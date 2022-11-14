@@ -39,7 +39,7 @@ def main():
         # DouyinUtils.HostPiecesLike([page])
 
         # 下滚，保存url列表
-        # MyUtils.scroll([page])
+        MyUtils.scroll([page])
         urllist = []
         stole = MyUtils.nowstr()
         for VideoElement in DouyinUtils.HostPieces([page]):
@@ -95,7 +95,6 @@ def main():
             # 获取UserUID
             ueruid = userurl[userurl.rfind('/') + 1:]
             MyUtils.delog(ueruid)
-            # allusers.add(useruid)
 
             # 取消喜欢
             DouyinUtils.dislike([page])
@@ -121,8 +120,7 @@ def main():
             MyUtils.log(f'上个作品添加下载耗时{MyUtils.counttime(stole)}')
             MyUtils.delog(likecount)
         # 结束
-        page.quit()
-        raise MyUtils.MyError
+        pass
 
 
 if __name__ == '__main__':

@@ -1535,11 +1535,10 @@ class RefreshTXT(txt):
         self.loopcount = 0
         self.mode = 'Rtxt'
         # self.rollback()
-        RefreshTXT.set(self)
         RefreshTXT.backup(self)
 
     def backup(self):
-        # 备份
+        # 备份，set
         # region
         backupname = self.path.strip('.txt') + '_backup.txt'
         if not os.path.exists(backupname):
@@ -1548,6 +1547,7 @@ class RefreshTXT(txt):
             f.save('create backup')
         else:
             if counttime(txt(backupname).l[0]) > 3600 * 24:
+                RefreshTXT.set(self)
                 f = txt(backupname)
                 f.l = extend([nowstr()], self.l)
                 f.save('refresh backup')
@@ -1808,10 +1808,11 @@ class cache():
 
     def get(self):
         while True:
+
             try:
                 f = txt(self.path)
                 if f.l == []:
-                    return []
+                    return
                 s = jsontodict(f.l[0])
                 f.l.pop(0)
                 f.save('cache get')
