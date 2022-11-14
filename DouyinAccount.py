@@ -22,7 +22,8 @@ def main():
     # 变量
     likecount = {}
     ispic = []
-    page = MyUtils.chrome(mine=True)
+    Page = MyUtils.Chrome(mine=True)
+    page=Page.driver
 
     while True:
         # 登录
@@ -54,7 +55,10 @@ def main():
             page.get(url)
 
             # 跳过验证
-            MyUtils.skip([page, By.ID, "captcha-verify-image"], strict=True)
+            MyUtils.skip([page, By.ID, "captcha-verify-image"])
+            e=Page.element('//*[@id="login-pannel"]/div[@class="dy-account-close"]',strict=False)
+            if not e==None:
+                Page.click(e)
 
             # 变量
             pic = ispic.pop(0)

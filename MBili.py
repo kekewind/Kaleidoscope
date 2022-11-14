@@ -120,7 +120,9 @@ def countrecord():
     MyUtils.log(f'记录总数：{videospectrum.length()}')
 
 def count():
+    # 15024
     countrecord()
+    # 1048
     countdownloaded()
 
 if __name__ == '__main__':

@@ -529,7 +529,7 @@ def info(s):
             try:
                 total_b, used_b, free_b = shutil.disk_usage(s.strip('\n') + ':')  # 查看磁盘的使用情况
             except Exception as e:
-                Exit(-1)
+                Exit(e)
             log(f'{s.upper()}' + '盘总空间: {:6.2f} GB '.format(total_b / gb))
             log('\t已使用 : {:6.2f} GB '.format(used_b / gb))
             log('\t\t空余 : {:6.2f} GB '.format(free_b / gb))
@@ -645,7 +645,7 @@ def Elements(l, depth=5, silent=None):
 
 
 # 必须要跳过的
-def skip(l, strict=False):
+def skip(l):
     """
     简单跳过，不做操作，等待人工操作来跳过，否则一直等待
     :param l:列表：页面，XPATH/ID，字符串
@@ -810,27 +810,39 @@ class Edge():
                 except Exception as e:
                     warn(['clickelement error！', e])
 
-    def element(self, s):
+    # 根据多个但只有一个有效的字符串匹配元素，返回第一个
+    def element(self, s,depth=9,silent=True,strict=True):
         if not type(s) == list:
-            ret = Element([self.driver, By.XPATH, s])
+            ret = Element([self.driver, By.XPATH, s],depth=depth,silent=True)
         else:
             for i in s:
-                ret = Element([self.driver, By.XPATH, i])
+                ret = Element([self.driver, By.XPATH, i],depth=depth,silent=True)
                 if not ret == None:
                     break
-        self.errorscr(ret)
-        return ret
+        if strict:
+            self.errorscr(ret)
+            return ret
 
-    def elements(self, s):
+    # 根据多个但只有一个有效的字符串匹配元素，返回第一组
+    def elements(self, s,depth=9,silent=True,strict=True):
+        '''
+
+        @param s:
+        @param depth:
+        @param silent:
+        @param strict:True表示如果没找到，直接报错
+        @return:
+        '''
         if not type(s) == list:
-            ret = Elements([self.driver, By.XPATH, s])
+            ret = Elements([self.driver, By.XPATH, s],depth=depth,silent=True)
         else:
             for i in s:
-                ret = Elements([self.driver, By.XPATH, i])
+                ret = Elements([self.driver, By.XPATH, i],depth=depth,silent=True)
                 if not ret == []:
                     break
-        self.errorscr(ret)
-        return ret
+        if strict:
+            self.errorscr(ret)
+            return ret
 
     def scroll(self, a=0):
         if type(a) in [int]:
@@ -884,12 +896,14 @@ class Edge():
             Edge.screenshot(path, Edge.element(self, s))
             return
 
+    # 遇到异常（元素为空时），终止并检查当前页面截图
     def errorscr(self, t):
         if t in [None, False]:
             print(nowstr())
-            self.driver.get_screenshot_as_file(f'D:/Kaleidoscope/error/{(1)}.png')
-            pyperclip.copy('D:/Kaleidoscope/error')
-            Exit(-1)
+            path=f'D:/Kaleidoscope/error/current.png'
+            self.driver.get_screenshot_as_file(path)
+            look(path)
+            Exit(f't={t}')
 
     # 查看当前页面
     def look(self,a=None):
@@ -904,6 +918,9 @@ class Edge():
 
     def close(self):
         self.driver.close()
+
+    def skip(self,s):
+        return skip([self.driver,By.XPATH,s])
 
 class Chrome(Edge):
     def __init__(self, url='', mine=None, silent=None, t=100):
