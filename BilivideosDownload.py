@@ -88,7 +88,7 @@ def main():
                 time.sleep(0.7)
                 MyUtils.log(f'{author} {bvid}已加入下载器')
                 MyUtils.click(1246, 722)
-                time.sleep(0.7)
+                time.sleep(1.5)
         download()
         pyautogui.hotkey('alt', 'tab')
 
@@ -121,8 +121,8 @@ def main():
             title, author = MyUtils.cuttail(j, '-')
             MyUtils.move(i, f'./bili/{author}_{useruid}/{title}_{bvid}')
 
-    step1()
-    step2()
+    # step1()
+    # step2()
     step3()
 
 if __name__ == '__main__':
