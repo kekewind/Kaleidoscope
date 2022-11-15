@@ -121,8 +121,8 @@ def main():
             title, author = MyUtils.cuttail(j, '-')
             MyUtils.move(i, f'./bili/{author}_{useruid}/{title}_{bvid}')
 
-    # step1()
-    # step2()
+    step1()
+    step2()
     step3()
 
 if __name__ == '__main__':
