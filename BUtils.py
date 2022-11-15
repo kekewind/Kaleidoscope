@@ -45,7 +45,7 @@ def addpiece(d):
 # 获得用户主页的response （暂时不是json - request
 def hostjson(uid, pagenum, ):
     url = (f'https://api.bilibili.com/x/space/arc/search?mid={uid}&ps=30&tid=0&pn={pagenum}&keyword=&order=pubdate&jsonp=jsonp')
-    MyUtils.delog(uid, pagenum)
+    MyUtils.delog(f'探测作者{uid}视频页的第{pagenum}页')
     res = requests.get(url, headers=MyUtils.headers)
     # 如果结束就退出
     if pagenum * 30 > res.json()['data']['page']['count'] and not pagenum == 1:
@@ -104,3 +104,36 @@ def idtouid(id):
 
 def skipdownloaded(bvid):
     return str(bvid) in MyUtils.keys(videouserspectrum.d)
+
+# up主
+class up():
+    def __init__(self,uid,author=None):
+        self.uid=uid
+        self.author=author
+        self.getvlist()
+
+    def getvlist(self):
+        page=MyUtils.Chrome(f'https://space.bilibili.com/{self.uid}',silent=True)
+        vnum=page.element('//*[@id="page-index"]//*[@class="section-title"]/span').text
+        vnum=int(vnum)
+        self.vlist=[]
+        pagenum=0
+        while True:
+            pagenum += 1
+            json=hostjson(self.uid,pagenum)
+            if not json:
+                break
+            json=json.json()['data']['list']['vlist']
+            for i in json:
+                self.vlist.append(video(i))
+
+# 视频
+class video():
+    def __init__(self,d):
+        self.bvid=d['bvid']
+        # self.length=d['length']
+        # self.author=d['author']
+        # self.title=d['title']
+        # self.description=d['description']
+        # self.pic=d['pic']
+        # self.subtitle=d['subtitle']

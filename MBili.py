@@ -125,11 +125,27 @@ def count():
     # 1224
     countdownloaded()
 
+# 可能产生的错误，视频作者归并错了
+# 先查用户所有的bv号，再核对，没有的报错，然后进行人工检查
+def mistake():
+    for i in MyUtils.listdir('./bili'):
+        author,useruid=MyUtils.splittail(i,'_')
+        author=MyUtils.gettail(author,'/')
+        up=BUtils.up(useruid,author)
+        vlist=[]
+        for j in up.vlist:
+            vlist.append(j.bvid)
+        for j in MyUtils.listdir(i):
+            bvid=MyUtils.gettail(j,'_')
+            if not bvid in vlist:
+                MyUtils.warn(f'{author} {bvid}')
+
 if __name__ == '__main__':
-    count()
+    # count()
     # adduser()
     # checkweb()
     # delete()
     # checkisindisk()
+    mistake()
     # makerecord()
     pass
