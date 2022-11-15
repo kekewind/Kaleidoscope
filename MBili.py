@@ -122,11 +122,11 @@ def countrecord():
 def count():
     # 15024
     countrecord()
-    # 1048
+    # 1224
     countdownloaded()
 
 if __name__ == '__main__':
-    # count()
+    count()
     # adduser()
     # checkweb()
     # delete()
