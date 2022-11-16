@@ -129,6 +129,8 @@ def count():
 # 先查用户所有的bv号，再核对，没有的报错，然后进行人工检查
 def mistake():
     for i in MyUtils.listdir('./bili'):
+        if 'bili/cache' in i:
+            continue
         author,useruid=MyUtils.splittail(i,'_')
         author=MyUtils.gettail(author,'/')
         up=BUtils.up(useruid,author)
